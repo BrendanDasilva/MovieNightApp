@@ -11,9 +11,9 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // needed for auth body parsing
+app.use(express.json());
 
-// Connect to MongoDB
+// MongoDB connection (keep this in case you add saving later)
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
