@@ -194,7 +194,21 @@ const Watchlist = ({ onLogout }) => {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       <NavBar onLogout={onLogout} />
 
-      <div className="w-full max-w-5xl mt-20 px-4 py-10 bg-white rounded shadow">
+      {/* Block 1: Selected Movies */}
+      <div className="w-full max-w-5xl mt-28 px-4 py-10 bg-white rounded shadow">
+        <h1 className="text-xl font-bold uppercase text-center">
+          Movie Night Selections
+        </h1>
+        <SelectedMovies
+          selectedPosters={selectedPosters}
+          posterMap={posterMap}
+          setSelectedMovie={setSelectedMovie}
+          handleRemovePoster={handleRemovePoster}
+        />
+      </div>
+
+      {/* Block 2: Search, Refresh, Toggle and Watchlist */}
+      <div className="w-full max-w-5xl mt-8 mb-8 px-4 py-10 bg-white rounded shadow">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-4">
             Letterboxd Watchlist Viewer
@@ -208,20 +222,12 @@ const Watchlist = ({ onLogout }) => {
             isPosterView={isPosterView}
             toggleView={() => setIsPosterView(!isPosterView)}
           />
-
-          {/* Selected movies section */}
-          <SelectedMovies
-            selectedPosters={selectedPosters}
-            posterMap={posterMap}
-            setSelectedMovie={setSelectedMovie}
-            handleRemovePoster={handleRemovePoster}
-          />
-
-          {count > 0 && (
-            <h3 className="mt-6 text-lg font-medium">{count} movies found</h3>
-          )}
         </div>
-
+        {count > 0 && (
+          <h3 className="mb-6 text-lg font-medium text-center">
+            {count} movies found
+          </h3>
+        )}
         {isLoading && <LoadingDots />}
 
         {!isPosterView && !isLoading && (

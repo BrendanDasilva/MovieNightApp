@@ -1,7 +1,7 @@
 const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
-      <div className="w-full max-w-5xl mt-20 px-4 py-10 bg-white rounded shadow">
+      <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-white rounded shadow">
         <h2 className="text-3xl font-bold mb-4 text-center">Welcome back,</h2>
         <p className="text-center text-gray-700 text-lg mb-8">
           Here’s what you chose between last time…

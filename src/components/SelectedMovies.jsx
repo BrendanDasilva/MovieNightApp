@@ -13,7 +13,7 @@ const SelectedMovies = ({
         return (
           <div
             key={idx}
-            className="h-48 bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 text-lg overflow-hidden cursor-pointer"
+            className="h-[480px] bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 text-lg overflow-hidden cursor-pointer"
             onClick={() => title && setSelectedMovie({ title })}
           >
             {poster ? (
@@ -23,7 +23,7 @@ const SelectedMovies = ({
                 className="w-full h-full object-cover rounded"
               />
             ) : (
-              `Placeholder ${idx + 1}`
+              `Pick ${idx + 1}`
             )}
             {poster && (
               <button
