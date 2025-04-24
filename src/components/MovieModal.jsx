@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const MovieModal = ({ movie, onClose }) => {
+const MovieModal = ({
+  movie,
+  onClose,
+  onAdd,
+  onRemove,
+  isSelected,
+  canAdd,
+}) => {
   const [details, setDetails] = useState(null);
 
   useEffect(() => {
@@ -29,6 +36,7 @@ const MovieModal = ({ movie, onClose }) => {
         >
           ✕
         </button>
+
         {!details ? (
           <div>Loading...</div>
         ) : details.error ? (
@@ -67,11 +75,31 @@ const MovieModal = ({ movie, onClose }) => {
             <p>
               <strong>Country:</strong> {details.country}
             </p>
-            {details.awards !== "N/A" && (
-              <p>
-                <strong>Awards:</strong> {details.awards}
-              </p>
-            )}
+
+            <div className="mt-4 flex gap-2">
+              {isSelected ? (
+                <button
+                  onClick={() => {
+                    onRemove(movie.title);
+                    onClose();
+                  }}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Remove
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onAdd(movie.title);
+                    onClose();
+                  }}
+                  disabled={!canAdd}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {canAdd ? "Add" : "Max Selected"}
+                </button>
+              )}
+            </div>
           </>
         )}
       </div>

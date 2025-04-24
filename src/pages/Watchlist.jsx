@@ -17,8 +17,21 @@ const Watchlist = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedPosters, setSelectedPosters] = useState(() => {
+    const saved = localStorage.getItem("selectedPosters");
+    try {
+      return saved ? JSON.parse(saved) : ["", "", ""];
+    } catch {
+      return ["", "", ""];
+    }
+  });
 
   const loadMoreRef = useRef(null);
+
+  // Persist selected posters to localStorage
+  useEffect(() => {
+    localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
+  }, [selectedPosters]);
 
   const handleWatchlistResponse = (titles) => {
     setAllMovies(titles);
@@ -31,6 +44,7 @@ const Watchlist = ({ onLogout }) => {
     setVisibleMovies([]);
     setPosterMap({});
     setCount(0);
+    setSelectedPosters(["", "", ""]);
   };
 
   const fetchWatchlist = async () => {
@@ -78,6 +92,19 @@ const Watchlist = ({ onLogout }) => {
     }, 500);
   };
 
+  const handleAddPoster = (title) => {
+    const emptyIndex = selectedPosters.findIndex((p) => p === "");
+    if (emptyIndex !== -1) {
+      const updated = [...selectedPosters];
+      updated[emptyIndex] = title;
+      setSelectedPosters(updated);
+    }
+  };
+
+  const handleRemovePoster = (title) => {
+    setSelectedPosters((prev) => prev.map((p) => (p === title ? "" : p)));
+  };
+
   useEffect(() => {
     const fetchPosters = async () => {
       const toFetch = visibleMovies.filter((title) => !posterMap[title]);
@@ -106,6 +133,35 @@ const Watchlist = ({ onLogout }) => {
       fetchPosters();
     }
   }, [visibleMovies, isPosterView]);
+
+  useEffect(() => {
+    const fetchSelectedPosters = async () => {
+      const toFetch = selectedPosters.filter(
+        (title) => title && !posterMap[title]
+      );
+
+      for (const title of toFetch) {
+        try {
+          const res = await axios.get(
+            `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
+          );
+          const { poster } = res.data;
+
+          setPosterMap((prev) => ({
+            ...prev,
+            [title]: poster || null,
+          }));
+        } catch {
+          setPosterMap((prev) => ({
+            ...prev,
+            [title]: null,
+          }));
+        }
+      }
+    };
+
+    fetchSelectedPosters();
+  }, [selectedPosters]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -152,6 +208,30 @@ const Watchlist = ({ onLogout }) => {
             toggleView={() => setIsPosterView(!isPosterView)}
           />
 
+          {/* Selected movies section */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {selectedPosters.map((title, idx) => {
+              const poster = posterMap[title];
+              return (
+                <div
+                  key={idx}
+                  className="h-48 bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 text-lg overflow-hidden cursor-pointer"
+                  onClick={() => title && setSelectedMovie({ title })}
+                >
+                  {poster ? (
+                    <img
+                      src={poster}
+                      alt={title}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  ) : (
+                    `Placeholder ${idx + 1}`
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
           {count > 0 && (
             <h3 className="mt-6 text-lg font-medium">{count} movies found</h3>
           )}
@@ -181,8 +261,15 @@ const Watchlist = ({ onLogout }) => {
                     </button>
                   </td>
                   <td className="p-3">
-                    <button className="bg-purple-500 text-white px-3 py-1 rounded">
-                      Add
+                    <button
+                      className="bg-purple-500 text-white px-3 py-1 rounded disabled:opacity-50"
+                      disabled={
+                        selectedPosters.includes(title) ||
+                        !selectedPosters.includes("")
+                      }
+                      onClick={() => handleAddPoster(title)}
+                    >
+                      {selectedPosters.includes(title) ? "Added" : "Add"}
                     </button>
                   </td>
                 </tr>
@@ -198,13 +285,33 @@ const Watchlist = ({ onLogout }) => {
               if (!poster) return null;
 
               return (
-                <img
-                  key={idx}
-                  src={poster}
-                  alt={title}
-                  onClick={() => setSelectedMovie({ title })}
-                  className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
-                />
+                <div className="relative" key={idx}>
+                  <img
+                    src={poster}
+                    alt={title}
+                    onClick={() => setSelectedMovie({ title })}
+                    className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
+                  />
+                  <button
+                    className={`absolute top-2 right-2 text-white px-2 py-1 rounded text-sm ${
+                      selectedPosters.includes(title)
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-purple-500 hover:bg-purple-600"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectedPosters.includes(title)
+                        ? handleRemovePoster(title)
+                        : handleAddPoster(title);
+                    }}
+                    disabled={
+                      !selectedPosters.includes(title) &&
+                      !selectedPosters.includes("")
+                    }
+                  >
+                    {selectedPosters.includes(title) ? "Remove" : "Add"}
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -218,6 +325,10 @@ const Watchlist = ({ onLogout }) => {
         <MovieModal
           movie={selectedMovie}
           onClose={() => setSelectedMovie(null)}
+          onAdd={handleAddPoster}
+          onRemove={handleRemovePoster}
+          isSelected={selectedPosters.includes(selectedMovie.title)}
+          canAdd={selectedPosters.includes("")}
         />
       )}
     </div>
