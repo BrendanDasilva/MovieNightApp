@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import AuthForm from "./components/AuthForm";
+import LoginForm from "./components/LoginForm";
+import RegisterForm from "./components/RegisterForm";
 import MainApp from "./MainApp";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -19,11 +21,21 @@ const App = () => {
     setToken(null);
   };
 
-  if (!token) {
-    return <AuthForm onAuth={setToken} />;
+  if (token) {
+    return <MainApp onLogout={handleLogout} />;
   }
 
-  return <MainApp onLogout={handleLogout} />;
+  return showRegister ? (
+    <RegisterForm
+      onAuth={setToken}
+      switchToLogin={() => setShowRegister(false)}
+    />
+  ) : (
+    <LoginForm
+      onAuth={setToken}
+      switchToRegister={() => setShowRegister(true)}
+    />
+  );
 };
 
 export default App;

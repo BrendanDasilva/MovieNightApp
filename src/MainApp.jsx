@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import MovieModal from "./components/MovieModal";
+import NavBar from "./components/NavBar";
+import Search from "./components/Search";
+import LoadingDots from "./components/LoadingDots";
 
 const CHUNK_SIZE = 20;
 
@@ -14,8 +17,16 @@ const MainApp = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const loadMoreRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasFetched) {
+      fetchWatchlist();
+      setHasFetched(true);
+    }
+  }, [hasFetched]);
 
   const fetchWatchlist = async () => {
     setIsLoading(true);
@@ -25,12 +36,11 @@ const MainApp = ({ onLogout }) => {
     setCount(0);
 
     try {
-      const res = await axios.get(
-        `http://localhost:3001/watchlist/${username}`
-      );
-      setAllMovies(res.data);
-      setVisibleMovies(res.data.slice(0, CHUNK_SIZE));
-      setCount(res.data.length);
+      const res = await axios.get("http://localhost:3001/watchlist/me");
+      const formatted = res.data.map((title) => title); // titles only
+      setAllMovies(formatted);
+      setVisibleMovies(formatted.slice(0, CHUNK_SIZE));
+      setCount(formatted.length);
     } catch (err) {
       console.error("Failed to fetch watchlist");
     } finally {
@@ -53,25 +63,23 @@ const MainApp = ({ onLogout }) => {
 
   useEffect(() => {
     const fetchPosters = async () => {
-      const toFetch = visibleMovies.filter((m) => !posterMap[m.title]);
+      const toFetch = visibleMovies.filter((title) => !posterMap[title]);
 
-      for (const movie of toFetch) {
+      for (const title of toFetch) {
         try {
           const res = await axios.get(
-            `http://localhost:3001/tmdb?title=${encodeURIComponent(
-              movie.title
-            )}${movie.year ? `&year=${movie.year}` : ""}`
+            `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
           );
           const { poster } = res.data;
 
           setPosterMap((prev) => ({
             ...prev,
-            [movie.title]: poster || null,
+            [title]: poster || null,
           }));
         } catch {
           setPosterMap((prev) => ({
             ...prev,
-            [movie.title]: null,
+            [title]: null,
           }));
         }
       }
@@ -92,37 +100,9 @@ const MainApp = ({ onLogout }) => {
     return () => observer.disconnect();
   }, [visibleMovies, allMovies]);
 
-  const LoadingDots = () => (
-    <div className="flex justify-center my-6">
-      <div className="flex flex-row gap-2">
-        <div className="w-4 h-4 rounded-full bg-red-500 animate-bounce"></div>
-        <div className="w-4 h-4 rounded-full bg-red-500 animate-bounce [animation-delay:-.3s]"></div>
-        <div className="w-4 h-4 rounded-full bg-red-500 animate-bounce [animation-delay:-.5s]"></div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
-      <nav className="w-full bg-blue-700 text-white py-4 shadow-md fixed top-0 left-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">🎬 Movie Night App</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm opacity-75">
-              Powered by Letterboxd + TMDB
-            </span>
-            <button className="text-sm underline hover:text-white">
-              Account
-            </button>
-            <button
-              onClick={onLogout}
-              className="text-sm underline hover:text-white"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <NavBar onLogout={onLogout} />
 
       <div className="w-full max-w-5xl mt-20 px-4 py-10 bg-white rounded shadow">
         <div className="text-center mb-6">
@@ -130,26 +110,13 @@ const MainApp = ({ onLogout }) => {
             Letterboxd Watchlist Viewer
           </h2>
 
-          <div className="flex justify-center gap-4">
-            <input
-              className="border border-gray-300 px-4 py-2 rounded w-64"
-              placeholder="Enter Letterboxd username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <button
-              onClick={fetchWatchlist}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Fetch
-            </button>
-            <button
-              onClick={() => setIsPosterView(!isPosterView)}
-              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Toggle View
-            </button>
-          </div>
+          <Search
+            username={username}
+            setUsername={setUsername}
+            fetchWatchlist={fetchWatchlist}
+            isPosterView={isPosterView}
+            toggleView={() => setIsPosterView(!isPosterView)}
+          />
 
           {count > 0 && (
             <h3 className="mt-6 text-lg font-medium">{count} movies found</h3>
@@ -168,21 +135,12 @@ const MainApp = ({ onLogout }) => {
               </tr>
             </thead>
             <tbody>
-              {visibleMovies.map((movie, idx) => (
+              {visibleMovies.map((title, idx) => (
                 <tr key={idx} className="border-b hover:bg-gray-100">
-                  <td className="p-3">
-                    <a
-                      href={movie.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {movie.title}
-                    </a>
-                  </td>
+                  <td className="p-3">{title}</td>
                   <td className="p-3">
                     <button
-                      onClick={() => setSelectedMovie(movie)}
+                      onClick={() => setSelectedMovie({ title })}
                       className="bg-green-500 text-white px-3 py-1 rounded"
                     >
                       Info
@@ -201,16 +159,16 @@ const MainApp = ({ onLogout }) => {
 
         {isPosterView && !isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
-            {visibleMovies.map((movie, idx) => {
-              const poster = posterMap[movie.title];
+            {visibleMovies.map((title, idx) => {
+              const poster = posterMap[title];
               if (!poster) return null;
 
               return (
                 <img
                   key={idx}
                   src={poster}
-                  alt={movie.title}
-                  onClick={() => setSelectedMovie(movie)}
+                  alt={title}
+                  onClick={() => setSelectedMovie({ title })}
                   className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
                 />
               );
