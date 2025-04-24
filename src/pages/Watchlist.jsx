@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import MovieModal from "../components/MovieModal";
 import NavBar from "../components/NavBar";
 import Search from "../components/Search";
 import LoadingDots from "../components/LoadingDots";
+import SelectedMovies from "../components/SelectedMovies";
 
 const CHUNK_SIZE = 20;
 
@@ -209,28 +210,12 @@ const Watchlist = ({ onLogout }) => {
           />
 
           {/* Selected movies section */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {selectedPosters.map((title, idx) => {
-              const poster = posterMap[title];
-              return (
-                <div
-                  key={idx}
-                  className="h-48 bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 text-lg overflow-hidden cursor-pointer"
-                  onClick={() => title && setSelectedMovie({ title })}
-                >
-                  {poster ? (
-                    <img
-                      src={poster}
-                      alt={title}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  ) : (
-                    `Placeholder ${idx + 1}`
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <SelectedMovies
+            selectedPosters={selectedPosters}
+            posterMap={posterMap}
+            setSelectedMovie={setSelectedMovie}
+            handleRemovePoster={handleRemovePoster}
+          />
 
           {count > 0 && (
             <h3 className="mt-6 text-lg font-medium">{count} movies found</h3>
