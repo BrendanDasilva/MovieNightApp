@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NavBar from "./components/NavBar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
-import MainApp from "./MainApp";
+import Home from "./pages/Home";
+import Logs from "./pages/Logs";
+import Watchlist from "./pages/Watchlist";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [showRegister, setShowRegister] = useState(false);
+  const [showLogin, setShowLogin] = useState(true);
 
   useEffect(() => {
     if (token) {
@@ -21,20 +25,26 @@ const App = () => {
     setToken(null);
   };
 
-  if (token) {
-    return <MainApp onLogout={handleLogout} />;
+  if (!token) {
+    return showLogin ? (
+      <LoginForm onAuth={setToken} toggle={() => setShowLogin(false)} />
+    ) : (
+      <RegisterForm onAuth={setToken} toggle={() => setShowLogin(true)} />
+    );
   }
 
-  return showRegister ? (
-    <RegisterForm
-      onAuth={setToken}
-      switchToLogin={() => setShowRegister(false)}
-    />
-  ) : (
-    <LoginForm
-      onAuth={setToken}
-      switchToRegister={() => setShowRegister(true)}
-    />
+  return (
+    <Router>
+      <NavBar onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/watchlist"
+          element={<Watchlist onLogout={handleLogout} />}
+        />
+        <Route path="/logs" element={<Logs />} />
+      </Routes>
+    </Router>
   );
 };
 

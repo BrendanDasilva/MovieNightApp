@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import MovieModal from "./components/MovieModal";
-import NavBar from "./components/NavBar";
-import Search from "./components/Search";
-import LoadingDots from "./components/LoadingDots";
+import MovieModal from "../components/MovieModal";
+import NavBar from "../components/NavBar";
+import Search from "../components/Search";
+import LoadingDots from "../components/LoadingDots";
 
 const CHUNK_SIZE = 20;
 
-const MainApp = ({ onLogout }) => {
+const Watchlist = ({ onLogout }) => {
   const [username, setUsername] = useState("");
   const [allMovies, setAllMovies] = useState([]);
   const [visibleMovies, setVisibleMovies] = useState([]);
@@ -224,4 +224,4 @@ const MainApp = ({ onLogout }) => {
   );
 };
 
-export default MainApp;
+export default Watchlist;
