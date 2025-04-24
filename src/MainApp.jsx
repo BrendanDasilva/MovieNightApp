@@ -17,32 +17,49 @@ const MainApp = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
-  const [hasFetched, setHasFetched] = useState(false);
 
   const loadMoreRef = useRef(null);
 
-  useEffect(() => {
-    if (!hasFetched) {
-      fetchWatchlist();
-      setHasFetched(true);
-    }
-  }, [hasFetched]);
+  const handleWatchlistResponse = (titles) => {
+    setAllMovies(titles);
+    setVisibleMovies(titles.slice(0, CHUNK_SIZE));
+    setCount(titles.length);
+  };
 
-  const fetchWatchlist = async () => {
-    setIsLoading(true);
+  const resetState = () => {
     setAllMovies([]);
     setVisibleMovies([]);
     setPosterMap({});
     setCount(0);
+  };
 
+  const fetchWatchlist = async () => {
+    if (!username) return;
+    setIsLoading(true);
+    resetState();
     try {
-      const res = await axios.get("http://localhost:3001/watchlist/me");
-      const formatted = res.data.map((title) => title); // titles only
-      setAllMovies(formatted);
-      setVisibleMovies(formatted.slice(0, CHUNK_SIZE));
-      setCount(formatted.length);
+      const res = await axios.get(
+        `http://localhost:3001/watchlist/${username}`
+      );
+      handleWatchlistResponse(res.data);
     } catch (err) {
       console.error("Failed to fetch watchlist");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshWatchlist = async () => {
+    if (!username) return;
+    setIsLoading(true);
+    resetState();
+    try {
+      const res = await axios.get(
+        `http://localhost:3001/watchlist/${username}/refresh`
+      );
+      handleWatchlistResponse(res.data);
+    } catch (err) {
+      console.error("Failed to refresh watchlist");
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +117,22 @@ const MainApp = ({ onLogout }) => {
     return () => observer.disconnect();
   }, [visibleMovies, allMovies]);
 
+  useEffect(() => {
+    const fetchInitialWatchlist = async () => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get("http://localhost:3001/watchlist/me");
+        handleWatchlistResponse(res.data);
+      } catch (err) {
+        console.error("Failed to load saved watchlist");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialWatchlist();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       <NavBar onLogout={onLogout} />
@@ -114,6 +147,7 @@ const MainApp = ({ onLogout }) => {
             username={username}
             setUsername={setUsername}
             fetchWatchlist={fetchWatchlist}
+            refreshWatchlist={refreshWatchlist}
             isPosterView={isPosterView}
             toggleView={() => setIsPosterView(!isPosterView)}
           />

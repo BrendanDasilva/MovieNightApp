@@ -69,4 +69,50 @@ router.get("/:username", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /watchlist/:username/refresh — force re-scrape and update
+router.get("/:username/refresh", authMiddleware, async (req, res) => {
+  const { username } = req.params;
+  const userId = req.user.id;
+  const baseUrl = `https://letterboxd.com/${username}/watchlist/by/release/`;
+
+  let page = 1;
+  let hasNextPage = true;
+  const titles = [];
+
+  try {
+    while (hasNextPage) {
+      const url = `${baseUrl}/page/${page}/`;
+      const { data } = await axios.get(url);
+      const $ = cheerio.load(data);
+
+      const posters = $(".poster-container");
+      if (posters.length === 0) {
+        hasNextPage = false;
+        break;
+      }
+
+      posters.each((_, el) => {
+        const title = $(el).find("img").attr("alt")?.trim();
+        if (title) {
+          titles.push(title);
+        }
+      });
+
+      page++;
+    }
+
+    await UserWatchlist.findOneAndUpdate(
+      { userId },
+      { movies: titles },
+      { upsert: true }
+    );
+
+    console.log("🔄 Refreshed titles:", titles.slice(0, 5));
+    res.json(titles);
+  } catch (err) {
+    console.error("❌ Refresh failed:", err.message);
+    res.status(500).json({ error: "Failed to refresh watchlist" });
+  }
+});
+
 export default router;
