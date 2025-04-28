@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const RegisterForm = ({ onAuth, switchToLogin }) => {
+const RegisterForm = ({ onAuth, toggle }) => {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -75,7 +75,7 @@ const RegisterForm = ({ onAuth, switchToLogin }) => {
         Already have an account?{" "}
         <button
           type="button"
-          onClick={switchToLogin}
+          onClick={toggle}
           className="underline text-blue-600"
         >
           Login

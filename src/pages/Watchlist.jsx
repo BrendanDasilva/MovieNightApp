@@ -178,7 +178,12 @@ const Watchlist = ({ onLogout }) => {
     const fetchInitialWatchlist = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:3001/watchlist/me");
+        const token = localStorage.getItem("token"); // get token
+        const res = await axios.get("http://localhost:3001/watchlist/me", {
+          headers: {
+            Authorization: `Bearer ${token}`, // attach token to request
+          },
+        });
         handleWatchlistResponse(res.data);
       } catch (err) {
         console.error("Failed to load saved watchlist");
