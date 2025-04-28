@@ -61,7 +61,6 @@ router.get("/:username", authMiddleware, async (req, res) => {
       { upsert: true }
     );
 
-    console.log("✅ Scraped & saved titles:", titles.slice(0, 5));
     res.json(titles);
   } catch (err) {
     console.error("❌ Scrape failed:", err.message);
