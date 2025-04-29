@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
-const LoginForm = ({ onAuth, toggle }) => {
+const LoginForm = ({ onAuth }) => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
@@ -52,13 +53,9 @@ const LoginForm = ({ onAuth, toggle }) => {
 
       <p className="text-sm text-center mt-4">
         Don’t have an account?{" "}
-        <button
-          type="button"
-          onClick={toggle}
-          className="underline text-blue-600"
-        >
+        <Link to="/register" className="underline text-blue-600">
           Register
-        </button>
+        </Link>
       </p>
     </form>
   );

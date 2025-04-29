@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /auth/register
 router.post("/register", async (req, res) => {

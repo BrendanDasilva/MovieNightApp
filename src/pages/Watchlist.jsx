@@ -18,6 +18,7 @@ const Watchlist = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [posterErrors, setPosterErrors] = useState({});
   const [selectedPosters, setSelectedPosters] = useState(() => {
     const saved = localStorage.getItem("selectedPosters");
     try {
@@ -27,9 +28,9 @@ const Watchlist = ({ onLogout }) => {
     }
   });
 
+  const fetchCache = useRef({});
   const loadMoreRef = useRef(null);
 
-  // Persist selected posters to localStorage
   useEffect(() => {
     localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
   }, [selectedPosters]);
@@ -106,59 +107,50 @@ const Watchlist = ({ onLogout }) => {
     setSelectedPosters((prev) => prev.map((p) => (p === title ? "" : p)));
   };
 
+  const fetchPoster = async (title) => {
+    if (!title) return null;
+    if (fetchCache.current[title]) return fetchCache.current[title];
+
+    try {
+      fetchCache.current[title] = { status: "pending" };
+      const res = await axios.get(
+        `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
+      );
+      const poster = res.data.poster || null;
+
+      fetchCache.current[title] = { status: "success", poster };
+      setPosterMap((prev) => ({ ...prev, [title]: poster }));
+      setPosterErrors((prev) => ({ ...prev, [title]: null }));
+      return poster;
+    } catch (err) {
+      fetchCache.current[title] = { status: "error" };
+      setPosterErrors((prev) => ({
+        ...prev,
+        [title]: "Failed to load poster",
+      }));
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const fetchPosters = async () => {
-      const toFetch = visibleMovies.filter((title) => !posterMap[title]);
+    if (!isPosterView) return;
 
-      for (const title of toFetch) {
-        try {
-          const res = await axios.get(
-            `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
-          );
-          const { poster } = res.data;
-
-          setPosterMap((prev) => ({
-            ...prev,
-            [title]: poster || null,
-          }));
-        } catch {
-          setPosterMap((prev) => ({
-            ...prev,
-            [title]: null,
-          }));
-        }
-      }
+    const fetchVisiblePosters = async () => {
+      const toFetch = visibleMovies.filter(
+        (title) => !posterMap[title] && !fetchCache.current[title]
+      );
+      await Promise.allSettled(toFetch.map((title) => fetchPoster(title)));
     };
 
-    if (isPosterView && visibleMovies.length > 0) {
-      fetchPosters();
-    }
+    fetchVisiblePosters();
   }, [visibleMovies, isPosterView]);
 
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
-        (title) => title && !posterMap[title]
+        (title) => title && !posterMap[title] && !fetchCache.current[title]
       );
-
-      for (const title of toFetch) {
-        try {
-          const res = await axios.get(
-            `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
-          );
-          const { poster } = res.data;
-
-          setPosterMap((prev) => ({
-            ...prev,
-            [title]: poster || null,
-          }));
-        } catch {
-          setPosterMap((prev) => ({
-            ...prev,
-            [title]: null,
-          }));
-        }
-      }
+      await Promise.allSettled(toFetch.map((title) => fetchPoster(title)));
     };
 
     fetchSelectedPosters();
@@ -166,9 +158,8 @@ const Watchlist = ({ onLogout }) => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && visibleMovies.length < allMovies.length) {
+      if (entry.isIntersecting && visibleMovies.length < allMovies.length)
         loadMore();
-      }
     });
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
@@ -178,11 +169,9 @@ const Watchlist = ({ onLogout }) => {
     const fetchInitialWatchlist = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem("token"); // get token
+        const token = localStorage.getItem("token");
         const res = await axios.get("http://localhost:3001/watchlist/me", {
-          headers: {
-            Authorization: `Bearer ${token}`, // attach token to request
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         handleWatchlistResponse(res.data);
       } catch (err) {
@@ -195,11 +184,68 @@ const Watchlist = ({ onLogout }) => {
     fetchInitialWatchlist();
   }, []);
 
+  const renderPoster = (title, idx) => {
+    const poster = posterMap[title];
+    const error = posterErrors[title];
+
+    if (error) {
+      return (
+        <div className="relative w-full aspect-[2/3] bg-gray-200 rounded-lg shadow-inner flex flex-col items-center justify-center p-2 text-center">
+          <span className="text-red-500 text-sm mb-2">
+            Error loading poster
+          </span>
+          <button
+            onClick={() => fetchPoster(title)}
+            className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    if (!poster) {
+      return (
+        <div className="w-full aspect-[2/3] bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 animate-pulse">
+          Loading...
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative" key={idx}>
+        <img
+          src={poster}
+          alt={title}
+          onClick={() => setSelectedMovie({ title })}
+          className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
+        />
+        <button
+          className={`absolute top-2 right-2 text-white px-2 py-1 rounded text-sm ${
+            selectedPosters.includes(title)
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-purple-500 hover:bg-purple-600"
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            selectedPosters.includes(title)
+              ? handleRemovePoster(title)
+              : handleAddPoster(title);
+          }}
+          disabled={
+            !selectedPosters.includes(title) && !selectedPosters.includes("")
+          }
+        >
+          {selectedPosters.includes(title) ? "Remove" : "Add"}
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       <NavBar onLogout={onLogout} />
 
-      {/* Block 1: Selected Movies */}
       <div className="w-full max-w-5xl mt-28 px-4 py-10 bg-white rounded shadow">
         <h1 className="text-xl font-bold uppercase text-center">
           Movie Night Selections
@@ -212,13 +258,11 @@ const Watchlist = ({ onLogout }) => {
         />
       </div>
 
-      {/* Block 2: Search, Refresh, Toggle and Watchlist */}
       <div className="w-full max-w-5xl mt-8 mb-8 px-4 py-10 bg-white rounded shadow">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-4">
             Letterboxd Watchlist Viewer
           </h2>
-
           <Search
             username={username}
             setUsername={setUsername}
@@ -276,40 +320,7 @@ const Watchlist = ({ onLogout }) => {
 
         {isPosterView && !isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
-            {visibleMovies.map((title, idx) => {
-              const poster = posterMap[title];
-              if (!poster) return null;
-
-              return (
-                <div className="relative" key={idx}>
-                  <img
-                    src={poster}
-                    alt={title}
-                    onClick={() => setSelectedMovie({ title })}
-                    className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
-                  />
-                  <button
-                    className={`absolute top-2 right-2 text-white px-2 py-1 rounded text-sm ${
-                      selectedPosters.includes(title)
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-purple-500 hover:bg-purple-600"
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      selectedPosters.includes(title)
-                        ? handleRemovePoster(title)
-                        : handleAddPoster(title);
-                    }}
-                    disabled={
-                      !selectedPosters.includes(title) &&
-                      !selectedPosters.includes("")
-                    }
-                  >
-                    {selectedPosters.includes(title) ? "Remove" : "Add"}
-                  </button>
-                </div>
-              );
-            })}
+            {visibleMovies.map((title, idx) => renderPoster(title, idx))}
           </div>
         )}
 
