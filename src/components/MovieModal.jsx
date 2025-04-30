@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-// Cache movie details for 5 minutes
-const MOVIE_CACHE_TTL = 5 * 60 * 1000;
+// Cache movie details for 60 minutes
+const MOVIE_CACHE_TTL = 60 * 60 * 1000;
 const movieCache = {};
 
 const MovieModal = ({

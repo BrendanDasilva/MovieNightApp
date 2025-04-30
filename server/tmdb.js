@@ -65,7 +65,7 @@ router.get("/", async (req, res) => {
       country: data.production_countries.map((c) => c.name).join(", "),
     });
   } catch (err) {
-    console.error("TMDB route error:", err.message);
+    console.error("TMDB API error:");
     res.status(500).json({ error: "Failed to fetch movie data" });
   }
 });
