@@ -1,6 +1,6 @@
-// server/models/User.js
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import validator from "validator";
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       validate: {
-        validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+        validator: (v) => validator.isEmail(v),
         message: "Invalid email format",
       },
     },
