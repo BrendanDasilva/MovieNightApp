@@ -1,12 +1,39 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const SelectedMovies = ({
   selectedPosters,
   posterMap,
   setSelectedMovie,
   handleRemovePoster,
+  setSelectedPosters,
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  const handleSelect = async (index) => {
+    if (!window.confirm("Are you sure you want to select this movie?")) return;
+
+    try {
+      const logData = selectedPosters.map((title, idx) => ({
+        title,
+        poster: posterMap[title] || "",
+        isSelected: idx === index,
+      }));
+
+      await axios.post(
+        "/api/logs",
+        { movies: logData },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      // Clear selection after successful submission
+      setSelectedPosters(["", "", ""]);
+    } catch (err) {
+      console.error("Failed to save log:", err);
+    }
+  };
 
   return (
     <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -30,13 +57,12 @@ const SelectedMovies = ({
               `Pick ${idx + 1}`
             )}
 
-            {/* Only show buttons when poster exists and hovered */}
             {poster && hoveredIndex === idx && (
               <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center gap-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("Select clicked"); // No real action yet
+                    handleSelect(idx);
                   }}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 >

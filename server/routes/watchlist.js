@@ -106,7 +106,6 @@ router.get("/:username/refresh", authMiddleware, async (req, res) => {
       { upsert: true }
     );
 
-    console.log("🔄 Refreshed titles:", titles.slice(0, 5));
     res.json(titles);
   } catch (err) {
     console.error("❌ Refresh failed:", err.message);

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import MovieModal from "../components/MovieModal";
 import NavBar from "../components/NavBar";
 import Search from "../components/Search";
 import LoadingDots from "../components/LoadingDots";
 import SelectedMovies from "../components/SelectedMovies";
+import SearchBox from "../components/SearchBox";
 
 const CHUNK_SIZE = 20;
 
@@ -13,12 +14,12 @@ const Watchlist = ({ onLogout }) => {
   const [allMovies, setAllMovies] = useState([]);
   const [visibleMovies, setVisibleMovies] = useState([]);
   const [posterMap, setPosterMap] = useState({});
-  const [count, setCount] = useState(0);
   const [isPosterView, setIsPosterView] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [posterErrors, setPosterErrors] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedPosters, setSelectedPosters] = useState(() => {
     const saved = localStorage.getItem("selectedPosters");
     try {
@@ -31,6 +32,12 @@ const Watchlist = ({ onLogout }) => {
   const fetchCache = useRef({});
   const loadMoreRef = useRef(null);
 
+  const filteredMovies = useMemo(() => {
+    return allMovies.filter((movie) =>
+      movie.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [allMovies, searchQuery]);
+
   useEffect(() => {
     localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
   }, [selectedPosters]);
@@ -38,14 +45,12 @@ const Watchlist = ({ onLogout }) => {
   const handleWatchlistResponse = (titles) => {
     setAllMovies(titles);
     setVisibleMovies(titles.slice(0, CHUNK_SIZE));
-    setCount(titles.length);
   };
 
   const resetState = () => {
     setAllMovies([]);
     setVisibleMovies([]);
     setPosterMap({});
-    setCount(0);
     setSelectedPosters(["", "", ""]);
   };
 
@@ -82,10 +87,10 @@ const Watchlist = ({ onLogout }) => {
   };
 
   const loadMore = () => {
-    if (isAppending || visibleMovies.length >= allMovies.length) return;
+    if (isAppending || visibleMovies.length >= filteredMovies.length) return;
     setIsAppending(true);
     setTimeout(() => {
-      const next = allMovies.slice(
+      const next = filteredMovies.slice(
         visibleMovies.length,
         visibleMovies.length + CHUNK_SIZE
       );
@@ -158,12 +163,16 @@ const Watchlist = ({ onLogout }) => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && visibleMovies.length < allMovies.length)
+      if (entry.isIntersecting && visibleMovies.length < filteredMovies.length)
         loadMore();
     });
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [visibleMovies, allMovies]);
+  }, [visibleMovies, filteredMovies]);
+
+  useEffect(() => {
+    setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
+  }, [filteredMovies]);
 
   useEffect(() => {
     const fetchInitialWatchlist = async () => {
@@ -255,6 +264,7 @@ const Watchlist = ({ onLogout }) => {
           posterMap={posterMap}
           setSelectedMovie={setSelectedMovie}
           handleRemovePoster={handleRemovePoster}
+          setSelectedPosters={setSelectedPosters}
         />
       </div>
 
@@ -271,10 +281,14 @@ const Watchlist = ({ onLogout }) => {
             isPosterView={isPosterView}
             toggleView={() => setIsPosterView(!isPosterView)}
           />
+          <SearchBox
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
-        {count > 0 && (
+        {filteredMovies.length > 0 && (
           <h3 className="mb-6 text-lg font-medium text-center">
-            {count} movies found
+            {filteredMovies.length} movies found
           </h3>
         )}
         {isLoading && <LoadingDots />}
