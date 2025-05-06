@@ -28,4 +28,15 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+router.get("/latest", auth, async (req, res) => {
+  try {
+    const log = await MovieLog.findOne({ userId: req.user.id })
+      .sort({ date: -1 })
+      .limit(1);
+    res.json(log || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export { router };
