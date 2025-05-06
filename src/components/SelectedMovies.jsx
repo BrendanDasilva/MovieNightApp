@@ -14,7 +14,16 @@ const SelectedMovies = ({
     if (!window.confirm("Are you sure you want to select this movie?")) return;
 
     try {
-      const logData = selectedPosters.map((title, idx) => ({
+      // Filter out empty slots first
+      const validMovies = selectedPosters.filter((title) => title !== "");
+
+      // Verify exactly 3 movies are selected
+      if (validMovies.length !== 3) {
+        alert("Please select exactly 3 movies before confirming");
+        return;
+      }
+
+      const logData = validMovies.map((title, idx) => ({
         title,
         poster: posterMap[title] || "",
         isSelected: idx === index,
@@ -25,13 +34,16 @@ const SelectedMovies = ({
         { movies: logData },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          "Content-Type": "application/json",
         }
       );
 
       // Clear selection after successful submission
       setSelectedPosters(["", "", ""]);
+      localStorage.removeItem("selectedPosters");
     } catch (err) {
       console.error("Failed to save log:", err);
+      alert("Failed to save selection. Please try again.");
     }
   };
 

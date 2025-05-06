@@ -18,7 +18,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // ================= Environment Configuration =================
 const allowedOrigins = [
   process.env.CLIENT_URL_DEV, // http://localhost:5173
-  process.env.CLIENT_URL_PROD, // https://yourdomain.com (future)
+  process.env.CLIENT_URL_PROD, // https://domain.com (future)
 ].filter(Boolean);
 
 // ================= Security Middleware =================

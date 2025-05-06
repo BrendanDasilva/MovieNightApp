@@ -56,6 +56,7 @@ const Logs = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 {new Date(log.date).toLocaleDateString("en-US", {
+                  weekday: "long", // Added weekday
                   year: "numeric",
                   month: "long",
                   day: "numeric",
