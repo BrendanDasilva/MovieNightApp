@@ -43,8 +43,10 @@ const Logs = () => {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Movie Selection History</h1>
+    <div className="p-8 max-w-6xl mx-auto ">
+      <h1 className="text-2xl font-bold mt-20 mb-6 text-white">
+        Movie Selection History
+      </h1>
 
       {logs.length === 0 ? (
         <div className="text-gray-500 text-center">
@@ -52,11 +54,14 @@ const Logs = () => {
         </div>
       ) : (
         logs.map((log, idx) => (
-          <div key={idx} className="mb-8 p-4 bg-white rounded shadow">
+          <div
+            key={idx}
+            className="mb-8 p-4 bg-[#202830] text-white rounded shadow"
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 {new Date(log.date).toLocaleDateString("en-US", {
-                  weekday: "long", // Added weekday
+                  weekday: "long",
                   year: "numeric",
                   month: "long",
                   day: "numeric",

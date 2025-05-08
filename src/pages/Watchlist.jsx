@@ -252,10 +252,10 @@ const Watchlist = ({ onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center">
       <NavBar onLogout={onLogout} />
 
-      <div className="w-full max-w-5xl mt-28 px-4 py-10 bg-white rounded shadow">
+      <div className="w-full max-w-5xl mt-28 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <h1 className="text-xl font-bold uppercase text-center">
           Movie Night Selections
         </h1>
@@ -268,7 +268,7 @@ const Watchlist = ({ onLogout }) => {
         />
       </div>
 
-      <div className="w-full max-w-5xl mt-8 mb-8 px-4 py-10 bg-white rounded shadow">
+      <div className="w-full max-w-5xl mt-8 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-4">
             Letterboxd Watchlist Viewer
@@ -296,7 +296,7 @@ const Watchlist = ({ onLogout }) => {
         {!isPosterView && !isLoading && (
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-200 text-left">
+              <tr className="bg-[#14181c] text-white text-left">
                 <th className="p-3">Title</th>
                 <th className="p-3">Info</th>
                 <th className="p-3">Add</th>
