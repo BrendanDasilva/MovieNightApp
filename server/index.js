@@ -71,7 +71,8 @@ app.use(express.json());
 
 // ================= Routes =================
 app.use("/auth", authLimiter, authRoutes);
-app.use("/tmdb", apiLimiter, tmdbRoute);
+app.use("/tmdb", apiLimiter, tmdbRoute); // TMDB API proxy
+app.use("/api/tmdb", apiLimiter, tmdbRoute); // tending movies
 app.use("/watchlist", apiLimiter, watchlistRoutes);
 app.use("/api/logs", apiLimiter, logsRouter);
 

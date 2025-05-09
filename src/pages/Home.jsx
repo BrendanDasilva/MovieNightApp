@@ -1,11 +1,40 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingDots from "../components/LoadingDots";
+import TrendingMovies from "../components/TrendingMovies";
+import MovieModal from "../components/MovieModal";
 
 const Home = () => {
   const [latestLog, setLatestLog] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadingTrending, setLoadingTrending] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
+  const [trendingError, setTrendingError] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedPosters, setSelectedPosters] = useState(() => {
+    const saved = localStorage.getItem("selectedPosters");
+    return saved ? JSON.parse(saved) : ["", "", ""];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
+  }, [selectedPosters]);
+
+  const handleAddPoster = (title) => {
+    const emptyIndex = selectedPosters.findIndex((p) => p === "");
+    if (emptyIndex !== -1) {
+      const updated = [...selectedPosters];
+      updated[emptyIndex] = title;
+      setSelectedPosters(updated);
+    }
+  };
+
+  const handleRemovePoster = (title) => {
+    setSelectedPosters((prev) => prev.map((p) => (p === title ? "" : p)));
+  };
+
+  const handleCloseModal = () => setSelectedMovie(null);
 
   useEffect(() => {
     const fetchLatestSelection = async () => {
@@ -17,12 +46,25 @@ const Home = () => {
         });
         setLatestLog(res.data);
       } catch (err) {
-        setError(err.response?.data?.error || err.message);
+        setHistoryError(err.response?.data?.error || err.message);
       } finally {
-        setLoading(false);
+        setLoadingHistory(false);
       }
     };
+
+    const fetchTrendingMovies = async () => {
+      try {
+        const res = await axios.get("/api/tmdb/trending");
+        setTrendingMovies(res.data);
+      } catch (err) {
+        setTrendingError(err.message);
+      } finally {
+        setLoadingTrending(false);
+      }
+    };
+
     fetchLatestSelection();
+    fetchTrendingMovies();
   }, []);
 
   return (
@@ -33,12 +75,12 @@ const Home = () => {
           Here’s what you chose between last time…
         </p>
 
-        {loading ? (
+        {loadingHistory ? (
           <div className="flex justify-center">
             <LoadingDots />
           </div>
-        ) : error ? (
-          <div className="text-center text-red-500">{error}</div>
+        ) : historyError ? (
+          <div className="text-center text-red-500">{historyError}</div>
         ) : latestLog?.movies ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {latestLog.movies.map((movie, i) => (
@@ -81,6 +123,36 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Trending This Week</h2>
+        </div>
+
+        {loadingTrending ? (
+          <div className="flex justify-center">
+            <LoadingDots />
+          </div>
+        ) : trendingError ? (
+          <div className="text-red-500 text-center">{trendingError}</div>
+        ) : (
+          <TrendingMovies
+            movies={trendingMovies}
+            onMovieClick={(movie) => setSelectedMovie(movie)}
+          />
+        )}
+      </div>
+
+      {selectedMovie && (
+        <MovieModal
+          movie={selectedMovie}
+          onClose={handleCloseModal}
+          onAdd={handleAddPoster}
+          onRemove={handleRemovePoster}
+          isSelected={selectedPosters.includes(selectedMovie.title)}
+          canAdd={selectedPosters.includes("")}
+        />
+      )}
     </div>
   );
 };

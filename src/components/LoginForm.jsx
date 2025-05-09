@@ -22,7 +22,7 @@ const LoginForm = ({ onAuth }) => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-20">
-      <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white text-center">Login</h2>
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
       <input
@@ -51,7 +51,7 @@ const LoginForm = ({ onAuth }) => {
         Login
       </button>
 
-      <p className="text-sm text-center mt-4">
+      <p className="text-md text-white text-center mt-4">
         Don’t have an account?{" "}
         <Link to="/register" className="underline text-blue-600">
           Register

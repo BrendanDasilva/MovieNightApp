@@ -12,7 +12,7 @@ const Navbar = ({ onLogout }) => {
     <nav className="w-full bg-[#14181c] text-white py-4 shadow-md fixed top-0 left-0 z-10">
       <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold">🎬 Movie Night App</h1>
+          <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
           <span className="text-xs opacity-75 block">
             Powered by Letterboxd + TMDB
           </span>

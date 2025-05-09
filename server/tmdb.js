@@ -70,4 +70,17 @@ router.get("/", async (req, res) => {
   }
 });
 
+// endpoint for trending movies
+router.get("/trending", async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/trending/movie/week?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+    );
+    res.json(response.data.results.slice(0, 8)); // Get first 8 trending movies
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
