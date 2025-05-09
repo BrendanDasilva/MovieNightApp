@@ -83,4 +83,21 @@ router.get("/trending", async (req, res) => {
   }
 });
 
+// endpoint for genre spotlight
+router.get("/genre/:genreId", async (req, res) => {
+  try {
+    const { genreId } = req.params;
+    const { page = 1 } = req.query;
+
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}` +
+        `&with_genres=${genreId}&sort_by=popularity.desc&page=${page}`
+    );
+
+    res.json(response.data.results.slice(0, 8));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

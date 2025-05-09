@@ -2,15 +2,19 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingDots from "../components/LoadingDots";
 import TrendingMovies from "../components/TrendingMovies";
+import GenreSpotlight from "../components/GenreSpotlight";
 import MovieModal from "../components/MovieModal";
 
 const Home = () => {
   const [latestLog, setLatestLog] = useState(null);
   const [trendingMovies, setTrendingMovies] = useState([]);
+  const [actionMovies, setActionMovies] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [loadingTrending, setLoadingTrending] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(true);
   const [historyError, setHistoryError] = useState(null);
   const [trendingError, setTrendingError] = useState(null);
+  const [actionError, setActionError] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedPosters, setSelectedPosters] = useState(() => {
     const saved = localStorage.getItem("selectedPosters");
@@ -63,8 +67,20 @@ const Home = () => {
       }
     };
 
+    const fetchActionMovies = async () => {
+      try {
+        const res = await axios.get("/api/tmdb/genre/28");
+        setActionMovies(res.data);
+      } catch (err) {
+        setActionError(err.message);
+      } finally {
+        setLoadingAction(false);
+      }
+    };
+
     fetchLatestSelection();
     fetchTrendingMovies();
+    fetchActionMovies();
   }, []);
 
   return (
@@ -138,6 +154,25 @@ const Home = () => {
         ) : (
           <TrendingMovies
             movies={trendingMovies}
+            onMovieClick={(movie) => setSelectedMovie(movie)}
+          />
+        )}
+      </div>
+
+      <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Action Spotlight</h2>
+        </div>
+
+        {loadingAction ? (
+          <div className="flex justify-center">
+            <LoadingDots />
+          </div>
+        ) : actionError ? (
+          <div className="text-red-500 text-center">{actionError}</div>
+        ) : (
+          <GenreSpotlight
+            movies={actionMovies}
             onMovieClick={(movie) => setSelectedMovie(movie)}
           />
         )}
