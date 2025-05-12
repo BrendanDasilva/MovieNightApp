@@ -100,4 +100,29 @@ router.get("/genre/:genreId", async (req, res) => {
   }
 });
 
+// endpoint for searching movies
+router.get("/search", async (req, res) => {
+  try {
+    const { query } = req.query;
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/search/movie?api_key=${
+        process.env.TMDB_API_KEY
+      }&query=${encodeURIComponent(query)}`
+    );
+
+    const simplifiedResults = response.data.results.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      release_date: movie.release_date,
+      overview: movie.overview,
+      vote_average: movie.vote_average,
+    }));
+
+    res.json(simplifiedResults);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

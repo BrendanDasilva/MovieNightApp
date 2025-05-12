@@ -21,6 +21,10 @@ const Home = () => {
     return saved ? JSON.parse(saved) : ["", "", ""];
   });
 
+  // const [news, setNews] = useState([]);
+  // const [loadingNews, setLoadingNews] = useState(true);
+  // const [newsError, setNewsError] = useState(null);
+
   useEffect(() => {
     localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
   }, [selectedPosters]);
@@ -82,6 +86,20 @@ const Home = () => {
     fetchTrendingMovies();
     fetchActionMovies();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchNews = async () => {
+  //     try {
+  //       const res = await axios.get("/api/news");
+  //       setNews(res.data);
+  //     } catch (err) {
+  //       setNewsError(err.response?.data?.error || err.message);
+  //     } finally {
+  //       setLoadingNews(false);
+  //     }
+  //   };
+  //   fetchNews();
+  // }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -177,6 +195,22 @@ const Home = () => {
           />
         )}
       </div>
+
+      {/* <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Latest Movie News</h2>
+        </div>
+
+        {loadingNews ? (
+          <div className="flex justify-center">
+            <LoadingDots />
+          </div>
+        ) : newsError ? (
+          <div className="text-red-500 text-center">{newsError}</div>
+        ) : (
+          <LatestNews articles={news} />
+        )}
+      </div> */}
 
       {selectedMovie && (
         <MovieModal

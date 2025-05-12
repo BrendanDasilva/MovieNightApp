@@ -11,19 +11,21 @@ const Navbar = ({ onLogout }) => {
   return (
     <nav className="w-full bg-[#14181c] text-white py-4 shadow-md fixed top-0 left-0 z-10">
       <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
-          <span className="text-xs opacity-75 block">
-            Powered by Letterboxd + TMDB
-          </span>
-        </div>
+        <Link to="/" className="hover:opacity-80 transition-opacity">
+          <div>
+            <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
+            <span className="text-xs opacity-75 block">
+              Powered by Letterboxd + TMDB
+            </span>
+          </div>
+        </Link>
 
         <div className="flex items-center gap-6 font-semibold uppercase">
           <Link
-            to="/"
+            to="/browse"
             className="text-sm px-4 py-2 rounded-md bg-[#ff8000] hover:bg-orange-600 transition-colors duration-200"
           >
-            Home
+            Browse
           </Link>
           <Link
             to="/watchlist"

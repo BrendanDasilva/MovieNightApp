@@ -13,6 +13,7 @@ import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Home from "./pages/Home";
 import Logs from "./pages/Logs";
+import Browse from "./pages/Browse";
 import Watchlist from "./pages/Watchlist";
 
 const AuthWrapper = ({ children }) => {
@@ -83,6 +84,7 @@ const App = () => {
                 <NavBar onLogout={handleLogout} />
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/browse" element={<Browse />} />
                   <Route
                     path="/watchlist"
                     element={<Watchlist onLogout={handleLogout} />}

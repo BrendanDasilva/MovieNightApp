@@ -23,7 +23,7 @@ const GenreSpotlight = ({
               year: movie.release_date?.split("-")[0],
             })
           }
-          className="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+          className="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-lg  cursor-pointer transition-transform duration-200 hover:scale-105"
         >
           <img
             src={

@@ -9,6 +9,7 @@ import tmdbRoute from "./tmdb.js";
 import authRoutes from "./routes/auth.js";
 import watchlistRoutes from "./routes/watchlist.js";
 import { router as logsRouter } from "./routes/logs.js";
+import newsRouter from "./routes/news.js";
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use(express.json());
 app.use("/auth", authLimiter, authRoutes);
 app.use("/tmdb", apiLimiter, tmdbRoute); // TMDB API proxy
 app.use("/api/tmdb", apiLimiter, tmdbRoute); // tending movies
+app.use("/api/news", apiLimiter, newsRouter); // latest news
 app.use("/watchlist", apiLimiter, watchlistRoutes);
 app.use("/api/logs", apiLimiter, logsRouter);
 
