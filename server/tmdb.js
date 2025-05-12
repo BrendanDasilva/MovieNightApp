@@ -48,7 +48,14 @@ router.get("/", async (req, res) => {
     res.json({
       title: data.title,
       year: data.release_date?.split("-")[0],
-      released: data.release_date,
+      released: data.release_date
+        ? new Date(data.release_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Release date not available",
+      tagline: data.tagline,
       poster: data.poster_path
         ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
         : null,

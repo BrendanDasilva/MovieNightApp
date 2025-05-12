@@ -37,7 +37,8 @@ const MovieModal = ({
         const movieData = {
           title: res.data.title,
           year: res.data.release_date?.split("-")[0],
-          released: res.data.release_date,
+          released: res.data.released,
+          tagline: res.data.tagline,
           poster: res.data.poster,
           genre: res.data.genre,
           director: res.data.director,
@@ -123,9 +124,13 @@ const MovieModal = ({
 
             <div className="flex-1 overflow-y-auto">
               <h2 className="text-2xl font-bold mb-4">
-                {details.title} ({details.year})
+                {details.title}
+                {details.year && ` (${details.year})`}
               </h2>
               <div className="space-y-2 text-sm">
+                {details.tagline && (
+                  <p className="italic text-gray-600">"{details.tagline}"</p>
+                )}
                 <p>
                   <strong>Released:</strong> {details.released}
                 </p>
