@@ -22,10 +22,16 @@ const Home = () => {
     const saved = localStorage.getItem("selectedPosters");
     return saved ? JSON.parse(saved) : ["", "", ""];
   });
-
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [newsError, setNewsError] = useState(null);
+  const [genres, setGenres] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState({
+    id: 28,
+    name: "Action",
+  });
+  const [loadingGenres, setLoadingGenres] = useState(true);
+  const [genreError, setGenreError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
@@ -73,9 +79,27 @@ const Home = () => {
       }
     };
 
-    const fetchActionMovies = async () => {
+    const fetchGenres = async () => {
       try {
-        const res = await axios.get("/api/tmdb/genre/28");
+        const res = await axios.get("/api/tmdb/genres");
+        setGenres(res.data);
+      } catch (err) {
+        setGenreError(err.message);
+      } finally {
+        setLoadingGenres(false);
+      }
+    };
+
+    fetchLatestSelection();
+    fetchTrendingMovies();
+    fetchGenres();
+  }, []);
+
+  useEffect(() => {
+    const fetchGenreMovies = async () => {
+      setLoadingAction(true);
+      try {
+        const res = await axios.get(`/api/tmdb/genre/${selectedGenre.id}`);
         setActionMovies(res.data);
       } catch (err) {
         setActionError(err.message);
@@ -83,11 +107,8 @@ const Home = () => {
         setLoadingAction(false);
       }
     };
-
-    fetchLatestSelection();
-    fetchTrendingMovies();
-    fetchActionMovies();
-  }, []);
+    fetchGenreMovies();
+  }, [selectedGenre.id]);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -181,7 +202,46 @@ const Home = () => {
 
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Action Spotlight</h2>
+          <h2 className="text-2xl font-bold">{selectedGenre.name} Spotlight</h2>
+          <div className="relative">
+            <select
+              value={selectedGenre.id}
+              onChange={(e) => {
+                const genre = genres.find(
+                  (g) => g.id === parseInt(e.target.value)
+                );
+                setSelectedGenre(genre);
+              }}
+              className="bg-[#14181c] text-white px-4 py-2 rounded-md border border-gray-600 appearance-none focus:outline-none focus:border-blue-500"
+            >
+              {loadingGenres ? (
+                <option>Loading genres...</option>
+              ) : genreError ? (
+                <option>Error loading genres</option>
+              ) : (
+                genres.map((genre) => (
+                  <option key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <div className="absolute right-3 top-3 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {loadingAction ? (

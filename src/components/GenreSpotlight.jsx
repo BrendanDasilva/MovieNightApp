@@ -1,13 +1,7 @@
 import React from "react";
 import LoadingDots from "./LoadingDots";
 
-const GenreSpotlight = ({
-  genreName,
-  movies,
-  loading,
-  error,
-  onMovieClick,
-}) => {
+const GenreSpotlight = ({ movies, loading, error, onMovieClick }) => {
   if (loading) return <LoadingDots />;
   if (error)
     return <div className="text-red-500">Error loading {genreName} movies</div>;

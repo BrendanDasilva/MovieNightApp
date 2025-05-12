@@ -7,6 +7,9 @@ dotenv.config();
 const router = express.Router();
 const tmdbKey = process.env.TMDB_API_KEY;
 
+// endpoint for movie details
+// This endpoint fetches movie details from TMDB based on title and year
+// and returns a structured response with relevant movie information.
 router.get("/", async (req, res) => {
   const title = req.query.title;
   const year = req.query.year;
@@ -127,6 +130,18 @@ router.get("/search", async (req, res) => {
     }));
 
     res.json(simplifiedResults);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// endpoint for fetching all genres
+router.get("/genres", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${tmdbKey}`
+    );
+    res.json(response.data.genres);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
