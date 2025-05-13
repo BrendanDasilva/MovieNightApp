@@ -304,7 +304,7 @@ const Watchlist = ({ onLogout }) => {
             </thead>
             <tbody>
               {visibleMovies.map((title, idx) => (
-                <tr key={idx} className="border-b hover:bg-gray-100">
+                <tr key={idx} className="hover:bg-gray-500">
                   <td className="p-3">{title}</td>
                   <td className="p-3">
                     <button

@@ -123,7 +123,7 @@ const MovieModal = ({
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              <h2 className="text-2xl font-bold mb-4">
+              <h2 className="text-2xl font-bold">
                 {details.title}
                 {details.year && ` (${details.year})`}
               </h2>

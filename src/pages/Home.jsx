@@ -202,7 +202,9 @@ const Home = () => {
 
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">{selectedGenre.name} Spotlight</h2>
+          <h2 className="text-2xl font-bold">
+            Popular in {selectedGenre.name}
+          </h2>
           <div className="relative">
             <select
               value={selectedGenre.id}
