@@ -7,6 +7,7 @@ const Logs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch logs on component mount
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -44,7 +45,7 @@ const Logs = () => {
 
   return (
     <div className="p-8 max-w-6xl mx-auto ">
-      <h1 className="text-2xl font-bold mt-20 mb-6 text-white">
+      <h1 className="text-2xl font-bold mt-20 mb-8 p-4 text-white text-center bg-[#202830] rounded shadow">
         Movie Selection History
       </h1>
 

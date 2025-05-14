@@ -3,11 +3,17 @@ import axios from "axios";
 import LoadingDots from "../components/LoadingDots";
 import TrendingMovies from "../components/TrendingMovies";
 import GenreSpotlight from "../components/GenreSpotlight";
-import MovieModal from "../components/MovieModal";
 import LatestNews from "../components/LatestNews";
 import Footer from "../components/Footer";
 
-const Home = () => {
+const Home = ({
+  selectedPosters,
+  posterMap,
+  handleAddPoster,
+  handleRemovePoster,
+  selectedMovie,
+  setSelectedMovie,
+}) => {
   const [latestLog, setLatestLog] = useState(null);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [actionMovies, setActionMovies] = useState([]);
@@ -17,11 +23,6 @@ const Home = () => {
   const [historyError, setHistoryError] = useState(null);
   const [trendingError, setTrendingError] = useState(null);
   const [actionError, setActionError] = useState(null);
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [selectedPosters, setSelectedPosters] = useState(() => {
-    const saved = localStorage.getItem("selectedPosters");
-    return saved ? JSON.parse(saved) : ["", "", ""];
-  });
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [newsError, setNewsError] = useState(null);
@@ -33,25 +34,7 @@ const Home = () => {
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [genreError, setGenreError] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem("selectedPosters", JSON.stringify(selectedPosters));
-  }, [selectedPosters]);
-
-  const handleAddPoster = (title) => {
-    const emptyIndex = selectedPosters.findIndex((p) => p === "");
-    if (emptyIndex !== -1) {
-      const updated = [...selectedPosters];
-      updated[emptyIndex] = title;
-      setSelectedPosters(updated);
-    }
-  };
-
-  const handleRemovePoster = (title) => {
-    setSelectedPosters((prev) => prev.map((p) => (p === title ? "" : p)));
-  };
-
-  const handleCloseModal = () => setSelectedMovie(null);
-
+  // Fetch latest selection, trending movies, and genres on component mount
   useEffect(() => {
     const fetchLatestSelection = async () => {
       try {
@@ -95,6 +78,7 @@ const Home = () => {
     fetchGenres();
   }, []);
 
+  // Fetch action movies based on selected genre
   useEffect(() => {
     const fetchGenreMovies = async () => {
       setLoadingAction(true);
@@ -110,6 +94,7 @@ const Home = () => {
     fetchGenreMovies();
   }, [selectedGenre.id]);
 
+  // Fetch latest movie news
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -276,16 +261,6 @@ const Home = () => {
         )}
       </div>
 
-      {selectedMovie && (
-        <MovieModal
-          movie={selectedMovie}
-          onClose={handleCloseModal}
-          onAdd={handleAddPoster}
-          onRemove={handleRemovePoster}
-          isSelected={selectedPosters.includes(selectedMovie.title)}
-          canAdd={selectedPosters.includes("")}
-        />
-      )}
       <Footer />
     </div>
   );

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// src/App.jsx
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   BrowserRouter as Router,
@@ -8,24 +9,25 @@ import {
   useLocation,
 } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
+
 import NavBar from "./components/NavBar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Home from "./pages/Home";
-import Logs from "./pages/Logs";
 import Browse from "./pages/Browse";
 import Watchlist from "./pages/Watchlist";
+import Logs from "./pages/Logs";
 
-const AuthWrapper = ({ children }) => {
-  const token = localStorage.getItem("token");
+import SelectedMovies from "./components/SelectedMovies";
+import MovieModal from "./components/MovieModal";
+
+function AuthWrapper({ token, children }) {
   const location = useLocation();
-
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
   return children;
-};
+}
 
 function ErrorFallback({ error }) {
   return (
@@ -37,19 +39,49 @@ function ErrorFallback({ error }) {
 }
 
 const App = () => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
+
+  const [selectedPosters, setSelectedPosters] = useState([]);
+  const [posterMap, setPosterMap] = useState({});
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
     } else {
-      delete axios.defaults.headers.common["Authorization"];
+      delete axios.defaults.headers.common.Authorization;
     }
   }, [token]);
 
+  const handleAuth = (newToken) => {
+    setToken(newToken);
+    localStorage.setItem("token", newToken);
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
     setToken(null);
+    localStorage.removeItem("token");
+    setSelectedPosters([]);
+    setPosterMap({});
+  };
+
+  const handleAddPoster = (title, posterUrl) => {
+    setSelectedPosters((prev) => {
+      if (prev.includes(title) || prev.length >= 3) return prev;
+      return [...prev, title];
+    });
+    setPosterMap((prev) => ({ ...prev, [title]: posterUrl }));
+  };
+
+  const handleRemovePoster = (title) => {
+    setSelectedPosters((prev) => prev.filter((t) => t !== title));
+    setPosterMap((prev) => {
+      const copy = { ...prev };
+      delete copy[title];
+      return copy;
+    });
   };
 
   return (
@@ -62,7 +94,7 @@ const App = () => {
               token ? (
                 <Navigate to="/" replace />
               ) : (
-                <LoginForm onAuth={setToken} />
+                <LoginForm onAuth={handleAuth} />
               )
             }
           />
@@ -72,22 +104,80 @@ const App = () => {
               token ? (
                 <Navigate to="/" replace />
               ) : (
-                <RegisterForm onAuth={setToken} />
+                <RegisterForm onAuth={handleAuth} />
               )
             }
           />
-
           <Route
             path="/*"
             element={
-              <AuthWrapper>
+              <AuthWrapper token={token}>
                 <NavBar onLogout={handleLogout} />
+
+                <SelectedMovies
+                  selectedPosters={selectedPosters}
+                  posterMap={posterMap}
+                  setSelectedMovie={setSelectedMovie}
+                  handleRemovePoster={handleRemovePoster}
+                />
+
+                {selectedMovie && (
+                  <MovieModal
+                    movie={selectedMovie}
+                    onClose={() => setSelectedMovie(null)}
+                    onAdd={() =>
+                      handleAddPoster(
+                        selectedMovie.title,
+                        posterMap[selectedMovie.title]
+                      )
+                    }
+                    onRemove={() => handleRemovePoster(selectedMovie.title)}
+                    isSelected={selectedPosters.includes(selectedMovie.title)}
+                    canAdd={selectedPosters.length < 3}
+                  />
+                )}
+
                 <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/browse" element={<Browse />} />
+                  <Route
+                    path="/"
+                    element={
+                      <Home
+                        selectedPosters={selectedPosters}
+                        posterMap={posterMap}
+                        handleAddPoster={handleAddPoster}
+                        handleRemovePoster={handleRemovePoster}
+                        selectedMovie={selectedMovie}
+                        setSelectedMovie={setSelectedMovie}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/browse"
+                    element={
+                      <Browse
+                        selectedPosters={selectedPosters}
+                        posterMap={posterMap}
+                        handleAddPoster={handleAddPoster}
+                        handleRemovePoster={handleRemovePoster}
+                        setSelectedMovie={setSelectedMovie}
+                        selectedMovie={selectedMovie}
+                      />
+                    }
+                  />
                   <Route
                     path="/watchlist"
-                    element={<Watchlist onLogout={handleLogout} />}
+                    element={
+                      <Watchlist
+                        onLogout={handleLogout}
+                        selectedPosters={selectedPosters}
+                        setSelectedPosters={setSelectedPosters}
+                        posterMap={posterMap}
+                        setPosterMap={setPosterMap}
+                        handleAddPoster={handleAddPoster}
+                        handleRemovePoster={handleRemovePoster}
+                        setSelectedMovie={setSelectedMovie}
+                      />
+                    }
                   />
                   <Route path="/logs" element={<Logs />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
