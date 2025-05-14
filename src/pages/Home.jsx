@@ -180,7 +180,14 @@ const Home = ({
         ) : (
           <TrendingMovies
             movies={trendingMovies}
-            onMovieClick={(movie) => setSelectedMovie(movie)}
+            onMovieClick={(movie) =>
+              setSelectedMovie({
+                title: movie.title,
+                poster: movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                  : null,
+              })
+            }
           />
         )}
       </div>
@@ -240,7 +247,14 @@ const Home = ({
         ) : (
           <GenreSpotlight
             movies={actionMovies}
-            onMovieClick={(movie) => setSelectedMovie(movie)}
+            onMovieClick={(movie) =>
+              setSelectedMovie({
+                title: movie.title,
+                poster: movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                  : null,
+              })
+            }
           />
         )}
       </div>

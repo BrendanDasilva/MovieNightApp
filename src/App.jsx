@@ -67,11 +67,23 @@ const App = () => {
     setPosterMap({});
   };
 
-  const handleAddPoster = (title, posterUrl) => {
-    setSelectedPosters((prev) => {
-      if (prev.includes(title) || prev.length >= 3) return prev;
-      return [...prev, title];
-    });
+  const handleAddPoster = async (title, posterUrl) => {
+    if (selectedPosters.includes(title) || selectedPosters.length >= 3) return;
+
+    // if no poster provided or missing in posterMap, fetch it from backend
+    if (!posterUrl && !posterMap[title]) {
+      try {
+        const res = await axios.get(
+          `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
+        );
+        posterUrl = res.data.poster;
+      } catch (err) {
+        console.error("Failed to fetch poster for:", title, err);
+        posterUrl = null;
+      }
+    }
+
+    setSelectedPosters((prev) => [...prev, title]);
     setPosterMap((prev) => ({ ...prev, [title]: posterUrl }));
   };
 
@@ -126,10 +138,7 @@ const App = () => {
                     movie={selectedMovie}
                     onClose={() => setSelectedMovie(null)}
                     onAdd={() =>
-                      handleAddPoster(
-                        selectedMovie.title,
-                        posterMap[selectedMovie.title]
-                      )
+                      handleAddPoster(selectedMovie.title, selectedMovie.poster)
                     }
                     onRemove={() => handleRemovePoster(selectedMovie.title)}
                     isSelected={selectedPosters.includes(selectedMovie.title)}
