@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -46,6 +45,7 @@ const App = () => {
   const [selectedPosters, setSelectedPosters] = useState([]);
   const [posterMap, setPosterMap] = useState({});
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [successAlert, setSuccessAlert] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -70,7 +70,6 @@ const App = () => {
   const handleAddPoster = async (title, posterUrl) => {
     if (selectedPosters.includes(title) || selectedPosters.length >= 3) return;
 
-    // if no poster provided or missing in posterMap, fetch it from backend
     if (!posterUrl && !posterMap[title]) {
       try {
         const res = await axios.get(
@@ -96,9 +95,36 @@ const App = () => {
     });
   };
 
+  const handleConfirmSelection = async (selectedTitle) => {
+    try {
+      const moviesToSave = selectedPosters.map((title) => ({
+        title,
+        poster: posterMap[title],
+        isSelected: title === selectedTitle,
+      }));
+
+      await axios.post("/api/logs", { movies: moviesToSave });
+
+      setSuccessAlert(true);
+      setTimeout(() => setSuccessAlert(false), 3000);
+    } catch (err) {
+      console.error("Failed to save selection:", err);
+    }
+  };
+
   return (
     <Router>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
+        {successAlert && (
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                          bg-green-500 text-white px-6 py-3 rounded shadow-lg text-lg z-50 
+                          animate-fade-in-out"
+          >
+            Selection saved successfully!
+          </div>
+        )}
+
         <Routes>
           <Route
             path="/login"
@@ -131,6 +157,9 @@ const App = () => {
                   posterMap={posterMap}
                   setSelectedMovie={setSelectedMovie}
                   handleRemovePoster={handleRemovePoster}
+                  handleAddPoster={handleAddPoster}
+                  allWatchlistTitles={posterMap ? Object.keys(posterMap) : []}
+                  handleConfirmSelection={handleConfirmSelection}
                 />
 
                 {selectedMovie && (

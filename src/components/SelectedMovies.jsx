@@ -1,5 +1,5 @@
-// src/components/SelectedMovies.jsx
 import React, { useState } from "react";
+import axios from "axios";
 
 const PANEL_WIDTH_PX = 320; // 20rem
 const BUTTON_VISIBLE_PX = 48; // 3rem
@@ -9,13 +9,52 @@ const SelectedMovies = ({
   posterMap,
   setSelectedMovie,
   handleRemovePoster,
+  handleAddPoster,
+  allWatchlistTitles,
+  setSelectedPosters,
+  setPosterMap,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const toggleDrawer = () => setIsOpen((open) => !open);
 
-  // only show non-empty titles
   const titles = selectedPosters.filter((t) => t);
+
+  const handleRandom = () => {
+    if (!allWatchlistTitles.length) return;
+    const shuffled = [...allWatchlistTitles].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 3);
+    selected.forEach((title) => {
+      if (!selectedPosters.includes(title)) {
+        const poster = posterMap[title] || null;
+        handleAddPoster(title, poster);
+      }
+    });
+  };
+
+  const handleClear = () => {
+    selectedPosters.forEach((title) => handleRemovePoster(title));
+  };
+
+  const handleConfirmSelection = async (selectedTitle) => {
+    const movies = selectedPosters.map((title) => ({
+      title,
+      poster: posterMap[title],
+      isSelected: title === selectedTitle,
+    }));
+
+    try {
+      await axios.post("http://localhost:3001/api/logs", { movies });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      setSelectedPosters([]);
+      setPosterMap({});
+    } catch (err) {
+      console.error("Failed to submit selection", err);
+    }
+  };
 
   return (
     <div
@@ -73,7 +112,6 @@ const SelectedMovies = ({
         Movie Night Selections
       </span>
 
-      {/* panel content */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
         {titles.length === 0 ? (
           <p className="text-gray-500 text-sm">No movies selected.</p>
@@ -99,12 +137,20 @@ const SelectedMovies = ({
                   <span className="text-white text-sm font-medium">
                     {title}
                   </span>
-                  <button
-                    onClick={() => handleRemovePoster(title)}
-                    className="text-red-500 hover:underline text-xs"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowConfirm(title)}
+                      className="text-[#00e054] hover:underline text-xs"
+                    >
+                      Select
+                    </button>
+                    <button
+                      onClick={() => handleRemovePoster(title)}
+                      className="text-red-500 hover:underline text-xs"
+                    >
+                      Remove
+                    </button>
+                  </div>
                   {idx < titles.length - 1 && (
                     <hr className="w-full border-gray-700 mt-4" />
                   )}
@@ -114,6 +160,56 @@ const SelectedMovies = ({
           </div>
         )}
       </div>
+
+      <div className="p-4 flex flex-col items-center gap-3 text-white w-full">
+        <button
+          onClick={handleRandom}
+          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-[#00e054] hover:bg-green-600 transition-colors duration-200"
+        >
+          Random
+        </button>
+        <button
+          onClick={handleClear}
+          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-[#40bcf4] hover:bg-blue-600 transition-colors duration-200"
+        >
+          Clear
+        </button>
+      </div>
+
+      {/* confirmation dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-xl text-center animate-fade-in">
+            <p className="text-lg font-semibold mb-4">
+              Are you sure about this pick?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  handleConfirmSelection(showConfirm);
+                  setShowConfirm(null);
+                }}
+                className="px-4 py-2 rounded bg-[#00e054] text-white font-bold"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setShowConfirm(null)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* success toast */}
+      {showSuccess && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#00e054] text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
+          Selection logged successfully!
+        </div>
+      )}
     </div>
   );
 };
