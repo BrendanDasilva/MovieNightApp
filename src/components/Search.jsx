@@ -8,7 +8,7 @@ const Search = ({
 }) => (
   <div className="flex justify-center flex-wrap gap-4">
     <input
-      className="border border-gray-300 px-4 py-2 rounded w-64"
+      className="border border-gray-300 text-black px-4 py-2 rounded w-64"
       placeholder="Enter Letterboxd username"
       value={username}
       onChange={(e) => setUsername(e.target.value)}

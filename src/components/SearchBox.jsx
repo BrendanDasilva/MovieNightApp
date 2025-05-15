@@ -8,7 +8,7 @@ const SearchBox = ({ searchQuery, setSearchQuery }) => {
         placeholder="Search movies..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full max-w-md mx-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="w-full max-w-md mx-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
       />
     </div>
   );

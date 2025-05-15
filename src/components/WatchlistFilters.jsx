@@ -1,0 +1,89 @@
+import React from "react";
+
+const decades = [
+  "All",
+  "2020s",
+  "2010s",
+  "2000s",
+  "1990s",
+  "1980s",
+  "1970s",
+  "1960s",
+  "1950s",
+  "Earlier",
+];
+
+const sortOptions = [
+  { value: "yearDesc", label: "Year (Newest)" },
+  { value: "yearAsc", label: "Year (Oldest)" },
+  { value: "title", label: "Film Name" },
+  { value: "runtimeAsc", label: "Length (Short to Long)" },
+  { value: "runtimeDesc", label: "Length (Long to Short)" },
+  { value: "ratingDesc", label: "Rating (High to Low)" },
+  { value: "ratingAsc", label: "Rating (Low to High)" },
+];
+
+const WatchlistFilters = ({
+  genres,
+  selectedGenre,
+  setSelectedGenre,
+  selectedDecade,
+  setSelectedDecade,
+  sortBy,
+  setSortBy,
+}) => {
+  return (
+    <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
+      {/* Decade Filter */}
+      <div>
+        <label className="block text-sm text-white mb-1">Decade</label>
+        <select
+          value={selectedDecade}
+          onChange={(e) => setSelectedDecade(e.target.value)}
+          className="bg-[#14181c] text-white px-3 py-2 rounded border border-gray-600"
+        >
+          {decades.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Genre Filter */}
+      <div>
+        <label className="block text-sm text-white mb-1">Genre</label>
+        <select
+          value={selectedGenre}
+          onChange={(e) => setSelectedGenre(e.target.value)}
+          className="bg-[#14181c] text-white px-3 py-2 rounded border border-gray-600"
+        >
+          <option value="All">All</option>
+          {(genres || []).map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Sort By */}
+      <div>
+        <label className="block text-sm text-white mb-1">Sort By</label>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="bg-[#14181c] text-white px-3 py-2 rounded border border-gray-600"
+        >
+          {sortOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
+export default WatchlistFilters;
