@@ -31,7 +31,7 @@ const Watchlist = ({
 
   const filteredMovies = useMemo(() => {
     return allMovies.filter((movie) =>
-      movie.toLowerCase().includes(searchQuery.toLowerCase())
+      movie.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [allMovies, searchQuery]);
 
@@ -281,12 +281,12 @@ const Watchlist = ({
               </tr>
             </thead>
             <tbody>
-              {visibleMovies.map((title, idx) => (
+              {visibleMovies.map((movie, idx) => (
                 <tr key={idx} className="hover:bg-gray-500">
-                  <td className="p-3">{title}</td>
+                  <td className="p-3">{movie.title}</td>
                   <td className="p-3">
                     <button
-                      onClick={() => setSelectedMovie({ title })}
+                      onClick={() => setSelectedMovie(movie)}
                       className="bg-green-500 text-white px-3 py-1 rounded"
                     >
                       Info
@@ -296,12 +296,14 @@ const Watchlist = ({
                     <button
                       className="bg-purple-500 text-white px-3 py-1 rounded disabled:opacity-50"
                       disabled={
-                        selectedPosters.includes(title) ||
+                        selectedPosters.includes(movie.title) ||
                         selectedPosters.length >= 3
                       }
-                      onClick={() => handleAddPoster(title, posterMap[title])}
+                      onClick={() =>
+                        handleAddPoster(movie.title, posterMap[movie.title])
+                      }
                     >
-                      {selectedPosters.includes(title) ? "Added" : "Add"}
+                      {selectedPosters.includes(movie.title) ? "Added" : "Add"}
                     </button>
                   </td>
                 </tr>

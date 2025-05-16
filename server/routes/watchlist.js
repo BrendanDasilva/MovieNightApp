@@ -1,24 +1,19 @@
 import express from "express";
-import axios from "axios";
-import * as cheerio from "cheerio";
+import puppeteer from "puppeteer";
 import authMiddleware from "../middleware/authMiddleware.js";
 import UserWatchlist from "../models/UserWatchlist.js";
 
 const router = express.Router();
 
-// GET /watchlist/me — fetch from DB if exists
+// GET /watchlist/me — fetch from DB
 router.get("/me", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
     const record = await UserWatchlist.findOne({ userId });
-    if (record && record.movies.length > 0) {
-      return res.json(record.movies);
-    } else {
-      return res.json([]); // Empty list fallback
-    }
+    res.json(record?.movies || []);
   } catch (err) {
-    console.error("❌ Failed to fetch saved watchlist:", err.message);
+    console.error("❌ Failed to fetch watchlist:", err.message);
     res.status(500).json({ error: "Failed to fetch watchlist from database" });
   }
 });
@@ -29,87 +24,54 @@ router.get("/:username", authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const baseUrl = `https://letterboxd.com/${username}/watchlist/by/release/`;
 
+  const movies = [];
   let page = 1;
   let hasNextPage = true;
-  const titles = [];
 
   try {
+    const browser = await puppeteer.launch({ headless: "new" });
+    const pageInstance = await browser.newPage();
+
     while (hasNextPage) {
       const url = `${baseUrl}/page/${page}/`;
-      const { data } = await axios.get(url);
-      const $ = cheerio.load(data);
+      await pageInstance.goto(url, { waitUntil: "networkidle2" });
 
-      const posters = $(".poster-container");
-      if (posters.length === 0) {
+      // Wait for poster-container divs to be visible
+      const frameTitles = await pageInstance.$$eval(
+        "li.poster-container span.frame-title",
+        (nodes) => nodes.map((el) => el.textContent.trim())
+      );
+
+      if (frameTitles.length === 0) {
         hasNextPage = false;
         break;
       }
 
-      posters.each((_, el) => {
-        const title = $(el).find("img").attr("alt")?.trim();
-        if (title) {
-          titles.push(title);
+      for (const raw of frameTitles) {
+        const match = raw.match(/^(.+?)\s+\((\d{4})\)$/);
+        if (match) {
+          movies.push({ title: match[1], year: match[2] });
+        } else {
+          movies.push({ title: raw, year: null });
         }
-      });
+      }
 
       page++;
     }
 
+    await browser.close();
+    console.log(`✅ Scraped ${movies.length} movies`);
+
     await UserWatchlist.findOneAndUpdate(
       { userId },
-      { movies: titles },
+      { movies },
       { upsert: true }
     );
 
-    res.json(titles);
+    res.json(movies);
   } catch (err) {
-    console.error("❌ Scrape failed:", err.message);
+    console.error("❌ Puppeteer scrape failed:", err.message);
     res.status(500).json({ error: "Failed to scrape watchlist" });
-  }
-});
-
-// GET /watchlist/:username/refresh — force re-scrape and update
-router.get("/:username/refresh", authMiddleware, async (req, res) => {
-  const { username } = req.params;
-  const userId = req.user.id;
-  const baseUrl = `https://letterboxd.com/${username}/watchlist/by/release/`;
-
-  let page = 1;
-  let hasNextPage = true;
-  const titles = [];
-
-  try {
-    while (hasNextPage) {
-      const url = `${baseUrl}/page/${page}/`;
-      const { data } = await axios.get(url);
-      const $ = cheerio.load(data);
-
-      const posters = $(".poster-container");
-      if (posters.length === 0) {
-        hasNextPage = false;
-        break;
-      }
-
-      posters.each((_, el) => {
-        const title = $(el).find("img").attr("alt")?.trim();
-        if (title) {
-          titles.push(title);
-        }
-      });
-
-      page++;
-    }
-
-    await UserWatchlist.findOneAndUpdate(
-      { userId },
-      { movies: titles },
-      { upsert: true }
-    );
-
-    res.json(titles);
-  } catch (err) {
-    console.error("❌ Refresh failed:", err.message);
-    res.status(500).json({ error: "Failed to refresh watchlist" });
   }
 });
 
