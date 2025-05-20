@@ -4,6 +4,7 @@ import MovieLog from "../models/MovieLog.js";
 
 const router = express.Router();
 
+// Save a new movie log (array of 3 movies from a selection round)
 router.post("/", auth, async (req, res) => {
   try {
     const log = new MovieLog({
@@ -17,6 +18,7 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+// Get all movie logs for the authenticated user, sorted by date (latest first)
 router.get("/", auth, async (req, res) => {
   try {
     const logs = await MovieLog.find({ userId: req.user.id }).sort({
@@ -28,6 +30,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+// Get only the most recent log for the user
 router.get("/latest", auth, async (req, res) => {
   try {
     const log = await MovieLog.findOne({ userId: req.user.id })

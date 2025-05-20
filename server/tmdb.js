@@ -7,9 +7,7 @@ dotenv.config();
 const router = express.Router();
 const tmdbKey = process.env.TMDB_API_KEY;
 
-// endpoint for movie details
-// This endpoint fetches movie details from TMDB based on title and year
-// and returns a structured response with relevant movie information.
+// GET /tmdb — fetch movie details by title (and optional year)
 router.get("/", async (req, res) => {
   const title = req.query.title;
   const year = req.query.year;
@@ -17,6 +15,7 @@ router.get("/", async (req, res) => {
   if (!title) return res.status(400).json({ error: "Title is required" });
 
   try {
+    // Search for movie by title (and year if provided)
     let searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
       title
     )}&api_key=${tmdbKey}`;
@@ -29,10 +28,9 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Movie not found on TMDB" });
     }
 
-    // if year provided, trust results[0]
-    let matched = results[0];
+    let matched = results[0]; // Default to the first result
 
-    // fallback: try to match exact title + year
+    // Try exact match if year is provided
     if (year) {
       const exact = results.find(
         (r) =>
@@ -44,10 +42,12 @@ router.get("/", async (req, res) => {
 
     const movieId = matched.id;
 
+    // Fetch full movie details using TMDB movie ID
     const movieUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${tmdbKey}&append_to_response=credits`;
     const movieResponse = await axios.get(movieUrl);
     const data = movieResponse.data;
 
+    // Return structured movie data
     res.json({
       title: data.title,
       year: data.release_date?.split("-")[0],
@@ -82,7 +82,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// endpoint for trending movies
+// GET /tmdb/trending — fetch trending movies for the week
 router.get("/trending", async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -95,7 +95,7 @@ router.get("/trending", async (req, res) => {
   }
 });
 
-// endpoint for genre spotlight
+// GET /tmdb/genre/:genreId — fetch popular movies for a given genre
 router.get("/genre/:genreId", async (req, res) => {
   try {
     const { genreId } = req.params;
@@ -112,7 +112,7 @@ router.get("/genre/:genreId", async (req, res) => {
   }
 });
 
-// endpoint for searching movies
+// GET /tmdb/search — perform a title search
 router.get("/search", async (req, res) => {
   try {
     const { query } = req.query;
@@ -122,6 +122,7 @@ router.get("/search", async (req, res) => {
       }&query=${encodeURIComponent(query)}`
     );
 
+    // Simplify and return key data for search results
     const simplifiedResults = response.data.results.map((movie) => ({
       id: movie.id,
       title: movie.title,
@@ -137,7 +138,7 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// endpoint for fetching all genres
+// GET /tmdb/genres — fetch list of movie genres
 router.get("/genres", async (req, res) => {
   try {
     const response = await axios.get(

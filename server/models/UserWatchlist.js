@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 
 const UserWatchlistSchema = new mongoose.Schema({
+  // Reference to the user who owns this watchlist
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
     unique: true,
   },
+  // Array of movies added by the user
   movies: [
     {
       title: {

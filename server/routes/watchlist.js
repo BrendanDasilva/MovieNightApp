@@ -27,6 +27,7 @@ router.post("/add", authMiddleware, async (req, res) => {
   }
 
   try {
+    // Add movie if not already present (no duplicates due to $addToSet)
     const record = await UserWatchlist.findOneAndUpdate(
       { userId },
       { $addToSet: { movies: movie } },
@@ -50,6 +51,7 @@ router.delete("/remove", authMiddleware, async (req, res) => {
   }
 
   try {
+    // Remove the movie with a matching title from the user's watchlist
     const record = await UserWatchlist.findOneAndUpdate(
       { userId },
       { $pull: { movies: { title } } },

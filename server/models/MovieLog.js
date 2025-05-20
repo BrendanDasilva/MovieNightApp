@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Schema for storing a user's movie selection log
 const movieLogSchema = new mongoose.Schema(
   {
     userId: {
@@ -32,6 +33,7 @@ const movieLogSchema = new mongoose.Schema(
     ],
   },
   {
+    // Automatically track creation time as "date"
     timestamps: {
       createdAt: "date",
       updatedAt: false,
@@ -39,7 +41,7 @@ const movieLogSchema = new mongoose.Schema(
   }
 );
 
-// Add index for faster querying by date
+// Index for quick retrieval of the latest log entry
 movieLogSchema.index({ date: -1 });
 
 const MovieLog = mongoose.model("MovieLog", movieLogSchema);
