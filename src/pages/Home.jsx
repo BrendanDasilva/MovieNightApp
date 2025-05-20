@@ -34,7 +34,6 @@ const Home = ({
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [genreError, setGenreError] = useState(null);
 
-  // Fetch latest selection, trending movies, and genres on component mount
   useEffect(() => {
     const fetchLatestSelection = async () => {
       try {
@@ -78,7 +77,6 @@ const Home = ({
     fetchGenres();
   }, []);
 
-  // Fetch action movies based on selected genre
   useEffect(() => {
     const fetchGenreMovies = async () => {
       setLoadingAction(true);
@@ -94,7 +92,6 @@ const Home = ({
     fetchGenreMovies();
   }, [selectedGenre.id]);
 
-  // Fetch latest movie news
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -108,6 +105,31 @@ const Home = ({
     };
     fetchNews();
   }, []);
+
+  const handleAddToWatchlist = async (movie) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:3001/watchlist/add",
+        {
+          title: movie.title,
+          year: movie.release_date?.split("-")[0] || null,
+          genre: movie.genre_names?.join(", ") || "",
+          runtime: movie.runtime?.toString() || "",
+          rating: movie.vote_average || null,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert(`${movie.title} added to your watchlist.`);
+    } catch (err) {
+      console.error("Add to watchlist error:", err);
+      alert("Failed to add movie to watchlist.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -188,6 +210,7 @@ const Home = ({
                   : null,
               })
             }
+            onAddToWatchlist={handleAddToWatchlist}
           />
         )}
       </div>
@@ -255,6 +278,7 @@ const Home = ({
                   : null,
               })
             }
+            onAddToWatchlist={handleAddToWatchlist}
           />
         )}
       </div>

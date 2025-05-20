@@ -51,6 +51,8 @@ router.get("/", async (req, res) => {
     res.json({
       title: data.title,
       year: data.release_date?.split("-")[0],
+      release_date: data.release_date,
+      rating: data.vote_average,
       released: data.release_date
         ? new Date(data.release_date).toLocaleDateString("en-US", {
             year: "numeric",

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import NavBar from "../components/NavBar";
-import Search from "../components/Search";
 import LoadingDots from "../components/LoadingDots";
 import SearchBox from "../components/SearchBox";
 
@@ -17,10 +16,8 @@ const Watchlist = ({
   handleRemovePoster,
   setSelectedMovie,
 }) => {
-  const [username, setUsername] = useState("");
   const [allMovies, setAllMovies] = useState([]);
   const [visibleMovies, setVisibleMovies] = useState([]);
-  const [isPosterView, setIsPosterView] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
   const [posterErrors, setPosterErrors] = useState({});
@@ -40,38 +37,16 @@ const Watchlist = ({
     setVisibleMovies(titles.slice(0, CHUNK_SIZE));
   };
 
-  const resetState = () => {
-    setAllMovies([]);
-    setVisibleMovies([]);
-  };
-
   const fetchWatchlist = async () => {
-    if (!username) return;
     setIsLoading(true);
-    resetState();
     try {
-      const res = await axios.get(
-        `http://localhost:3001/watchlist/${username}`
-      );
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:3001/watchlist/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       handleWatchlistResponse(res.data);
     } catch (err) {
-      console.error("Failed to fetch watchlist");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshWatchlist = async () => {
-    if (!username) return;
-    setIsLoading(true);
-    resetState();
-    try {
-      const res = await axios.get(
-        `http://localhost:3001/watchlist/${username}/refresh`
-      );
-      handleWatchlistResponse(res.data);
-    } catch (err) {
-      console.error("Failed to refresh watchlist");
+      console.error("Failed to load saved watchlist");
     } finally {
       setIsLoading(false);
     }
@@ -115,21 +90,23 @@ const Watchlist = ({
     }
   };
 
-  // Fetch posters for visible movies
   useEffect(() => {
-    if (!isPosterView) return;
+    fetchWatchlist();
+  }, []);
 
+  useEffect(() => {
     const fetchVisiblePosters = async () => {
       const toFetch = visibleMovies.filter(
-        (title) => !posterMap[title] && !fetchCache.current[title]
+        (movie) =>
+          movie?.title &&
+          !posterMap[movie.title] &&
+          !fetchCache.current[movie.title]
       );
-      await Promise.allSettled(toFetch.map((title) => fetchPoster(title)));
+      await Promise.allSettled(toFetch.map((m) => fetchPoster(m.title)));
     };
-
     fetchVisiblePosters();
-  }, [visibleMovies, isPosterView]);
+  }, [visibleMovies]);
 
-  // Fetch posters for selected movies
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
@@ -137,11 +114,9 @@ const Watchlist = ({
       );
       await Promise.allSettled(toFetch.map((title) => fetchPoster(title)));
     };
-
     fetchSelectedPosters();
   }, [selectedPosters]);
 
-  // Infinite scroll for loading more movies
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && visibleMovies.length < filteredMovies.length)
@@ -151,32 +126,12 @@ const Watchlist = ({
     return () => observer.disconnect();
   }, [visibleMovies, filteredMovies]);
 
-  // Update visible movies when filtered movies change
   useEffect(() => {
     setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
   }, [filteredMovies]);
 
-  // Fetch initial watchlist
-  useEffect(() => {
-    const fetchInitialWatchlist = async () => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:3001/watchlist/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        handleWatchlistResponse(res.data);
-      } catch (err) {
-        console.error("Failed to load saved watchlist");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialWatchlist();
-  }, []);
-
-  const renderPoster = (title, idx) => {
+  const renderPoster = (movie, idx) => {
+    const title = movie.title;
     const poster = posterMap[title];
     const error = posterErrors[title];
 
@@ -215,7 +170,7 @@ const Watchlist = ({
         <img
           src={poster}
           alt={title}
-          onClick={() => setSelectedMovie({ title })}
+          onClick={() => setSelectedMovie(movie)}
           className="cursor-pointer w-full aspect-[2/3] object-cover rounded shadow-inner bg-gray-200 transition-transform duration-200 hover:scale-105"
         />
         <button
@@ -246,17 +201,7 @@ const Watchlist = ({
 
       <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-4">
-            Letterboxd Watchlist Viewer
-          </h2>
-          <Search
-            username={username}
-            setUsername={setUsername}
-            fetchWatchlist={fetchWatchlist}
-            refreshWatchlist={refreshWatchlist}
-            isPosterView={isPosterView}
-            toggleView={() => setIsPosterView(!isPosterView)}
-          />
+          <h2 className="text-2xl font-bold mb-4">Your Movie Watchlist</h2>
           <SearchBox
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -271,50 +216,9 @@ const Watchlist = ({
 
         {isLoading && <LoadingDots />}
 
-        {!isPosterView && !isLoading && (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#14181c] text-white text-left">
-                <th className="p-3">Title</th>
-                <th className="p-3">Info</th>
-                <th className="p-3">Add</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleMovies.map((movie, idx) => (
-                <tr key={idx} className="hover:bg-gray-500">
-                  <td className="p-3">{movie.title}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => setSelectedMovie(movie)}
-                      className="bg-green-500 text-white px-3 py-1 rounded"
-                    >
-                      Info
-                    </button>
-                  </td>
-                  <td className="p-3">
-                    <button
-                      className="bg-purple-500 text-white px-3 py-1 rounded disabled:opacity-50"
-                      disabled={
-                        selectedPosters.includes(movie.title) ||
-                        selectedPosters.length >= 3
-                      }
-                      onClick={() =>
-                        handleAddPoster(movie.title, posterMap[movie.title])
-                      }
-                    >
-                      {selectedPosters.includes(movie.title) ? "Added" : "Add"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {isPosterView && !isLoading && (
+        {!isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
-            {visibleMovies.map((title, idx) => renderPoster(title, idx))}
+            {visibleMovies.map((movie, idx) => renderPoster(movie, idx))}
           </div>
         )}
 

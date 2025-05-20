@@ -46,6 +46,7 @@ const App = () => {
   const [posterMap, setPosterMap] = useState({});
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [successAlert, setSuccessAlert] = useState(false);
+  const [watchlistAlert, setWatchlistAlert] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -112,16 +113,42 @@ const App = () => {
     }
   };
 
+  const handleAddToWatchlist = async (movie) => {
+    const token = localStorage.getItem("token");
+    if (!token || !movie?.title) return;
+
+    try {
+      await axios.post("http://localhost:3001/watchlist/add", movie, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWatchlistAlert(true);
+      setTimeout(() => setWatchlistAlert(false), 3000);
+      console.log(`✅ Added ${movie.title} to watchlist`);
+    } catch (err) {
+      console.error("❌ Failed to add to watchlist", err.message);
+    }
+  };
+
   return (
     <Router>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         {successAlert && (
           <div
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                          bg-green-500 text-white px-6 py-3 rounded shadow-lg text-lg z-50 
-                          animate-fade-in-out"
+                      bg-green-500 text-white px-6 py-3 rounded shadow-lg text-lg z-50 
+                      animate-fade-in-out"
           >
             Selection saved successfully!
+          </div>
+        )}
+
+        {watchlistAlert && (
+          <div
+            className="fixed top-20 left-1/2 transform -translate-x-1/2 
+                      bg-green-500 text-white px-6 py-3 rounded shadow-lg text-lg z-50 
+                      animate-fade-in-out"
+          >
+            Added to watchlist!
           </div>
         )}
 
@@ -172,6 +199,7 @@ const App = () => {
                     onRemove={() => handleRemovePoster(selectedMovie.title)}
                     isSelected={selectedPosters.includes(selectedMovie.title)}
                     canAdd={selectedPosters.length < 3}
+                    handleAddToWatchlist={handleAddToWatchlist}
                   />
                 )}
 

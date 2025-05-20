@@ -14,9 +14,7 @@ const Navbar = ({ onLogout }) => {
         <Link to="/" className="hover:opacity-80 transition-opacity">
           <div>
             <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
-            <span className="text-xs opacity-75 block">
-              Powered by Letterboxd + TMDB
-            </span>
+            <span className="text-xs opacity-75 block">Powered by TMDB</span>
           </div>
         </Link>
 

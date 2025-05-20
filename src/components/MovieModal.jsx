@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-// Cache movie details for 60 minutes
 const MOVIE_CACHE_TTL = 60 * 60 * 1000;
 const movieCache = {};
 
@@ -12,10 +11,11 @@ const MovieModal = ({
   onRemove,
   isSelected,
   canAdd,
+  handleAddToWatchlist,
 }) => {
   const [details, setDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const cacheKey = useRef(`${movie.title}-${movie.year}`);
+  const cacheKey = useRef(`${movie.title}`);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -29,14 +29,12 @@ const MovieModal = ({
       }
 
       try {
-        const query = `title=${encodeURIComponent(movie.title)}${
-          movie.year ? `&year=${movie.year}` : ""
-        }`;
+        const query = `title=${encodeURIComponent(movie.title)}`;
         const res = await axios.get(`http://localhost:3001/tmdb?${query}`);
 
         const movieData = {
           title: res.data.title,
-          year: res.data.release_date?.split("-")[0],
+          release_date: res.data.release_date,
           released: res.data.released,
           tagline: res.data.tagline,
           poster: res.data.poster,
@@ -47,6 +45,7 @@ const MovieModal = ({
           actors: res.data.actors,
           language: res.data.language,
           country: res.data.country,
+          rating: res.data.rating,
         };
 
         movieCache[cacheKey.current] = {
@@ -63,7 +62,7 @@ const MovieModal = ({
     };
 
     fetchDetails();
-  }, [movie.title, movie.year]);
+  }, [movie.title]);
 
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -125,7 +124,8 @@ const MovieModal = ({
             <div className="flex-1 overflow-y-auto">
               <h2 className="text-2xl font-bold">
                 {details.title}
-                {details.year && ` (${details.year})`}
+                {details.release_date &&
+                  ` (${details.release_date.split("-")[0]})`}
               </h2>
               <div className="space-y-2 text-sm">
                 {details.tagline && (
@@ -179,6 +179,13 @@ const MovieModal = ({
                     {canAdd ? "Add" : "Max Selected"}
                   </button>
                 )}
+
+                <button
+                  onClick={() => handleAddToWatchlist(details)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                >
+                  Add to Watchlist
+                </button>
               </div>
             </div>
           </div>

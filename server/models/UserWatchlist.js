@@ -14,9 +14,21 @@ const UserWatchlistSchema = new mongoose.Schema({
         required: true,
         trim: true,
       },
-      year: {
+      release_date: {
         type: String,
-        required: false,
+        required: true,
+      },
+      genre: {
+        type: String,
+        required: true,
+      },
+      runtime: {
+        type: String,
+        required: true,
+      },
+      rating: {
+        type: Number,
+        required: true,
       },
     },
   ],
