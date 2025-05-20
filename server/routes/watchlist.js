@@ -40,4 +40,26 @@ router.post("/add", authMiddleware, async (req, res) => {
   }
 });
 
+// DELETE /watchlist/remove — remove one movie from watchlist by title
+router.delete("/remove", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { title } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: "Missing movie title" });
+  }
+
+  try {
+    const record = await UserWatchlist.findOneAndUpdate(
+      { userId },
+      { $pull: { movies: { title } } },
+      { new: true }
+    );
+    res.json(record.movies);
+  } catch (err) {
+    console.error("❌ Failed to remove movie:", err.message);
+    res.status(500).json({ error: "Failed to remove movie from watchlist" });
+  }
+});
+
 export default router;

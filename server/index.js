@@ -27,7 +27,8 @@ app.use(
   cors({
     origin: isProduction ? process.env.CLIENT_URL_PROD : allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 

@@ -12,6 +12,8 @@ const MovieModal = ({
   isSelected,
   canAdd,
   handleAddToWatchlist,
+  handleRemoveFromWatchlist,
+  watchlistTitles = [],
 }) => {
   const [details, setDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +47,7 @@ const MovieModal = ({
           actors: res.data.actors,
           language: res.data.language,
           country: res.data.country,
-          rating: res.data.rating,
+          rating: res.data.vote_average,
         };
 
         movieCache[cacheKey.current] = {
@@ -73,6 +75,9 @@ const MovieModal = ({
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
+
+  const isInWatchlist =
+    details?.title && watchlistTitles.includes(details.title);
 
   return (
     <div
@@ -155,6 +160,9 @@ const MovieModal = ({
                 <p>
                   <strong>Country:</strong> {details.country}
                 </p>
+                <p>
+                  <strong>Rating:</strong> {details.rating}
+                </p>
               </div>
 
               <div className="mt-6 flex gap-4 flex-wrap">
@@ -180,12 +188,21 @@ const MovieModal = ({
                   </button>
                 )}
 
-                <button
-                  onClick={() => handleAddToWatchlist(details)}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                >
-                  Add to Watchlist
-                </button>
+                {isInWatchlist ? (
+                  <button
+                    onClick={() => handleRemoveFromWatchlist(details)}
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  >
+                    Remove from Watchlist
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleAddToWatchlist(details)}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                  >
+                    Add to Watchlist
+                  </button>
+                )}
               </div>
             </div>
           </div>
