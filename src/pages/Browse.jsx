@@ -17,6 +17,7 @@ const Browse = ({
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Handle adding movie to the backend watchlist (legacy logic, not used in modal button)
   const handleAddToWatchlist = async (movie) => {
     try {
       const token = localStorage.getItem("token");
@@ -32,6 +33,7 @@ const Browse = ({
     }
   };
 
+  // Search TMDB for matching titles, debounce 500ms
   useEffect(() => {
     const searchMovies = async () => {
       if (searchQuery.length < 3) return;
@@ -47,6 +49,7 @@ const Browse = ({
         setLoading(false);
       }
     };
+
     const debounceTimer = setTimeout(searchMovies, 500);
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
@@ -55,6 +58,7 @@ const Browse = ({
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow px-8 mt-20">
         <div className="max-w-6xl mx-auto">
+          {/* Search Section */}
           <div className="w-full max-w-5xl mx-auto px-4 py-10 bg-[#202830] text-white rounded shadow mt-8 mb-12">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold mt-4">Browse Movies</h1>
@@ -67,6 +71,8 @@ const Browse = ({
               {loading && <LoadingDots />}
             </div>
           </div>
+
+          {/* Search Results Grid */}
           {results.length > 0 && (
             <div className="mt-8 bg-[#202830] rounded-lg shadow">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
@@ -104,6 +110,8 @@ const Browse = ({
           )}
         </div>
       </div>
+
+      {/* Movie Details Modal */}
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}
@@ -115,6 +123,7 @@ const Browse = ({
           handleAddToWatchlist={handleAddToWatchlist}
         />
       )}
+
       <Footer />
     </div>
   );

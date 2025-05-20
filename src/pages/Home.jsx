@@ -14,26 +14,36 @@ const Home = ({
   selectedMovie,
   setSelectedMovie,
 }) => {
+  // State for latest movie log (previous selection)
   const [latestLog, setLatestLog] = useState(null);
+
+  // Trending movies
   const [trendingMovies, setTrendingMovies] = useState([]);
-  const [actionMovies, setActionMovies] = useState([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
   const [loadingTrending, setLoadingTrending] = useState(true);
-  const [loadingAction, setLoadingAction] = useState(true);
-  const [historyError, setHistoryError] = useState(null);
   const [trendingError, setTrendingError] = useState(null);
-  const [actionError, setActionError] = useState(null);
-  const [news, setNews] = useState([]);
-  const [loadingNews, setLoadingNews] = useState(true);
-  const [newsError, setNewsError] = useState(null);
+
+  // Genre spotlight section
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState({
     id: 28,
     name: "Action",
   });
+  const [actionMovies, setActionMovies] = useState([]);
   const [loadingGenres, setLoadingGenres] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(true);
   const [genreError, setGenreError] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
+  // News section
+  const [news, setNews] = useState([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+  const [newsError, setNewsError] = useState(null);
+
+  // Selection history
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
+
+  // Load on initial mount
   useEffect(() => {
     const fetchLatestSelection = async () => {
       try {
@@ -77,6 +87,7 @@ const Home = ({
     fetchGenres();
   }, []);
 
+  // Fetch movies from selected genre
   useEffect(() => {
     const fetchGenreMovies = async () => {
       setLoadingAction(true);
@@ -92,6 +103,7 @@ const Home = ({
     fetchGenreMovies();
   }, [selectedGenre.id]);
 
+  // Fetch latest movie news
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -106,6 +118,7 @@ const Home = ({
     fetchNews();
   }, []);
 
+  // Add a movie to watchlist from this page
   const handleAddToWatchlist = async (movie) => {
     try {
       const token = localStorage.getItem("token");
@@ -133,6 +146,7 @@ const Home = ({
 
   return (
     <div className="min-h-screen flex flex-col items-center">
+      {/* Welcome section with last selected movies */}
       <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <h2 className="text-3xl font-bold mb-4 text-center">Welcome back,</h2>
         <p className="text-center text-white text-lg mb-8">
@@ -175,6 +189,7 @@ const Home = ({
             ))}
           </div>
         ) : (
+          // If no log available
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div
@@ -188,6 +203,7 @@ const Home = ({
         )}
       </div>
 
+      {/* Trending Movies Section */}
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Trending This Week</h2>
@@ -215,12 +231,14 @@ const Home = ({
         )}
       </div>
 
+      {/* Genre Spotlight Section */}
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Popular in {selectedGenre.name}
           </h2>
           <div className="relative">
+            {/* Genre Dropdown */}
             <select
               value={selectedGenre.id}
               onChange={(e) => {
@@ -283,6 +301,7 @@ const Home = ({
         )}
       </div>
 
+      {/* News Section */}
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Latest Movie News</h2>

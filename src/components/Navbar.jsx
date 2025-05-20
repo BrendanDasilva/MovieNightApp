@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
 
+  // Handle logout and redirect to login page
   const handleLogout = () => {
     onLogout();
     navigate("/login");
@@ -11,6 +12,7 @@ const Navbar = ({ onLogout }) => {
   return (
     <nav className="w-full bg-[#14181c] text-white py-4 shadow-md fixed top-0 left-0 z-10">
       <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
+        {/* Logo and branding */}
         <Link to="/" className="hover:opacity-80 transition-opacity">
           <div>
             <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
@@ -18,6 +20,7 @@ const Navbar = ({ onLogout }) => {
           </div>
         </Link>
 
+        {/* Navigation tabs */}
         <div className="flex items-center gap-6 font-semibold uppercase">
           <Link
             to="/browse"
@@ -39,6 +42,7 @@ const Navbar = ({ onLogout }) => {
           </Link>
         </div>
 
+        {/* Logout button */}
         <div className="flex items-center gap-4">
           <button
             onClick={handleLogout}

@@ -26,17 +26,20 @@ const Watchlist = ({
   const fetchCache = useRef({});
   const loadMoreRef = useRef(null);
 
+  // Filter movies by search query
   const filteredMovies = useMemo(() => {
     return allMovies.filter((movie) =>
       movie.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [allMovies, searchQuery]);
 
+  // Save and show first chunk of movies
   const handleWatchlistResponse = (titles) => {
     setAllMovies(titles);
     setVisibleMovies(titles.slice(0, CHUNK_SIZE));
   };
 
+  // Fetch user's watchlist
   const fetchWatchlist = async () => {
     setIsLoading(true);
     try {
@@ -52,6 +55,7 @@ const Watchlist = ({
     }
   };
 
+  // Append more movies to the view
   const loadMore = () => {
     if (isAppending || visibleMovies.length >= filteredMovies.length) return;
     setIsAppending(true);
@@ -65,6 +69,7 @@ const Watchlist = ({
     }, 500);
   };
 
+  // Fetch poster for a given title and cache result
   const fetchPoster = async (title) => {
     if (!title) return null;
     if (fetchCache.current[title]) return fetchCache.current[title];
@@ -90,10 +95,12 @@ const Watchlist = ({
     }
   };
 
+  // Load initial watchlist
   useEffect(() => {
     fetchWatchlist();
   }, []);
 
+  // Fetch posters for all visible movies
   useEffect(() => {
     const fetchVisiblePosters = async () => {
       const toFetch = visibleMovies.filter(
@@ -107,6 +114,7 @@ const Watchlist = ({
     fetchVisiblePosters();
   }, [visibleMovies]);
 
+  // Fetch posters for selected movies (in case not visible yet)
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
@@ -117,6 +125,7 @@ const Watchlist = ({
     fetchSelectedPosters();
   }, [selectedPosters]);
 
+  // Trigger lazy loading via intersection observer
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && visibleMovies.length < filteredMovies.length)
@@ -126,10 +135,12 @@ const Watchlist = ({
     return () => observer.disconnect();
   }, [visibleMovies, filteredMovies]);
 
+  // Reset visible slice when filter changes
   useEffect(() => {
     setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
   }, [filteredMovies]);
 
+  // Render individual movie poster with button controls
   const renderPoster = (movie, idx) => {
     const title = movie.title;
     const poster = posterMap[title];

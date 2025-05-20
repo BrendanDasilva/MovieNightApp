@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+// Cache time-to-live: 1 hour
 const MOVIE_CACHE_TTL = 60 * 60 * 1000;
 const movieCache = {};
 
@@ -19,6 +20,7 @@ const MovieModal = ({
   const [isLoading, setIsLoading] = useState(true);
   const cacheKey = useRef(`${movie.title}`);
 
+  // Fetch movie details from TMDB or cache
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoading(true);
@@ -66,16 +68,19 @@ const MovieModal = ({
     fetchDetails();
   }, [movie.title]);
 
+  // Close modal if clicking outside
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
 
+  // ESC key closes modal
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
+  // Check if movie is already in watchlist
   const isInWatchlist =
     details?.title && watchlistTitles.includes(details.title);
 
@@ -85,6 +90,7 @@ const MovieModal = ({
       onClick={handleBackgroundClick}
     >
       <div className="bg-white w-full max-w-4xl max-h-[90vh] p-6 rounded shadow-lg relative overflow-y-auto">
+        {/* Close button */}
         <button
           className="absolute top-2 right-2 text-gray-600 hover:text-black"
           onClick={onClose}
@@ -92,6 +98,7 @@ const MovieModal = ({
           ✕
         </button>
 
+        {/* Loading state */}
         {isLoading ? (
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-shrink-0 w-full md:w-1/3">
@@ -111,8 +118,10 @@ const MovieModal = ({
             </div>
           </div>
         ) : details?.error ? (
+          // Error state
           <div className="text-red-500 text-center py-8">{details.error}</div>
         ) : (
+          // Movie content
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-shrink-0 w-full md:w-1/3">
               <img
@@ -165,6 +174,7 @@ const MovieModal = ({
                 </p>
               </div>
 
+              {/* Action buttons */}
               <div className="mt-6 flex gap-4 flex-wrap">
                 {isSelected ? (
                   <>
@@ -188,6 +198,7 @@ const MovieModal = ({
                   </button>
                 )}
 
+                {/* Watchlist action */}
                 {isInWatchlist ? (
                   <button
                     onClick={() => handleRemoveFromWatchlist(details)}

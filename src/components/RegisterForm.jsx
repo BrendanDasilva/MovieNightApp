@@ -10,21 +10,28 @@ const RegisterForm = ({ onAuth }) => {
   });
   const [error, setError] = useState("");
 
+  // Update form state on input change
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Handle registration form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Simple password confirmation check
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
     try {
+      // Send registration request
       const res = await axios.post("http://localhost:3001/auth/register", {
         email: form.email,
         password: form.password,
       });
+
+      // Store token and update auth state
       localStorage.setItem("token", res.data.token);
       onAuth(res.data.token);
     } catch (err) {
@@ -37,8 +44,10 @@ const RegisterForm = ({ onAuth }) => {
       <h2 className="text-2xl font-bold mb-4 text-white text-center">
         Register
       </h2>
+
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
+      {/* Email field */}
       <input
         type="email"
         name="email"
@@ -48,6 +57,8 @@ const RegisterForm = ({ onAuth }) => {
         className="w-full mb-3 px-4 py-2 border rounded"
         required
       />
+
+      {/* Password field */}
       <input
         type="password"
         name="password"
@@ -57,6 +68,8 @@ const RegisterForm = ({ onAuth }) => {
         className="w-full mb-3 px-4 py-2 border rounded"
         required
       />
+
+      {/* Confirm password field */}
       <input
         type="password"
         name="confirmPassword"
@@ -67,6 +80,7 @@ const RegisterForm = ({ onAuth }) => {
         required
       />
 
+      {/* Submit button */}
       <button
         type="submit"
         className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
@@ -74,6 +88,7 @@ const RegisterForm = ({ onAuth }) => {
         Register
       </button>
 
+      {/* Link to login page */}
       <p className="text-md text-white text-center mt-4">
         Already have an account?{" "}
         <Link to="/login" className="underline text-blue-600">

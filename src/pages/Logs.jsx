@@ -7,7 +7,7 @@ const Logs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch logs on component mount
+  // Fetch selection history when component mounts
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -27,6 +27,7 @@ const Logs = () => {
     fetchLogs();
   }, []);
 
+  // Show loading indicator while fetching
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -35,6 +36,7 @@ const Logs = () => {
     );
   }
 
+  // Show error if request failed
   if (error) {
     return (
       <div className="p-8 text-red-500 text-center">
@@ -45,20 +47,24 @@ const Logs = () => {
 
   return (
     <div className="p-8 max-w-6xl mx-auto ">
+      {/* Page title */}
       <h1 className="text-2xl font-bold mt-20 mb-8 p-4 text-white text-center bg-[#202830] rounded shadow">
         Movie Selection History
       </h1>
 
+      {/* No logs found fallback */}
       {logs.length === 0 ? (
         <div className="text-gray-500 text-center">
           No selection history found
         </div>
       ) : (
+        // Display each logged movie selection group
         logs.map((log, idx) => (
           <div
             key={idx}
             className="mb-8 p-4 bg-[#202830] text-white rounded shadow"
           >
+            {/* Date header */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 {new Date(log.date).toLocaleDateString("en-US", {
@@ -69,6 +75,8 @@ const Logs = () => {
                 })}
               </h3>
             </div>
+
+            {/* Grid of posters for that selection group */}
             <div className="grid grid-cols-3 gap-4">
               {log.movies.map((movie, movieIdx) => (
                 <div
@@ -77,6 +85,7 @@ const Logs = () => {
                     !movie.isSelected ? "grayscale" : ""
                   }`}
                 >
+                  {/* Movie poster */}
                   {movie.poster ? (
                     <img
                       src={movie.poster}
@@ -88,6 +97,8 @@ const Logs = () => {
                       {movie.title || "No poster available"}
                     </div>
                   )}
+
+                  {/* Movie label bar with selection check */}
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
                     <div className="flex justify-between items-center">
                       <span className="truncate">{movie.title}</span>

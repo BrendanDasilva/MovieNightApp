@@ -1,5 +1,6 @@
 import React from "react";
 
+// Static options for decade and sorting
 const decades = [
   "All",
   "2020s",
@@ -23,6 +24,7 @@ const sortOptions = [
   { value: "ratingAsc", label: "Rating (Low to High)" },
 ];
 
+// Filter component for decade, genre, and sorting controls
 const WatchlistFilters = ({
   genres,
   selectedGenre,
@@ -34,7 +36,7 @@ const WatchlistFilters = ({
 }) => {
   return (
     <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
-      {/* Decade Filter */}
+      {/* Decade filter dropdown */}
       <div>
         <label className="block text-sm text-white mb-1">Decade</label>
         <select
@@ -50,7 +52,7 @@ const WatchlistFilters = ({
         </select>
       </div>
 
-      {/* Genre Filter */}
+      {/* Genre filter dropdown */}
       <div>
         <label className="block text-sm text-white mb-1">Genre</label>
         <select
@@ -67,7 +69,7 @@ const WatchlistFilters = ({
         </select>
       </div>
 
-      {/* Sort By */}
+      {/* Sort options dropdown */}
       <div>
         <label className="block text-sm text-white mb-1">Sort By</label>
         <select

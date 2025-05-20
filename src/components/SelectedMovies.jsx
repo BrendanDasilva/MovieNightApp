@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const PANEL_WIDTH_PX = 320; // 20rem
-const BUTTON_VISIBLE_PX = 48; // 3rem
+// Panel and toggle button sizing constants
+const PANEL_WIDTH_PX = 320;
+const BUTTON_VISIBLE_PX = 48;
 
 const SelectedMovies = ({
   selectedPosters,
@@ -14,14 +15,15 @@ const SelectedMovies = ({
   setSelectedPosters,
   setPosterMap,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(null);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // controls drawer open/close
+  const [showConfirm, setShowConfirm] = useState(null); // for selection confirmation
+  const [showSuccess, setShowSuccess] = useState(false); // shows toast on success
 
   const toggleDrawer = () => setIsOpen((open) => !open);
 
-  const titles = selectedPosters.filter((t) => t);
+  const titles = selectedPosters.filter((t) => t); // clean list of selected movie titles
 
+  // Randomly select up to 3 movies from user's watchlist
   const handleRandom = () => {
     if (!allWatchlistTitles.length) return;
     const shuffled = [...allWatchlistTitles].sort(() => 0.5 - Math.random());
@@ -34,10 +36,12 @@ const SelectedMovies = ({
     });
   };
 
+  // Remove all selected posters
   const handleClear = () => {
     selectedPosters.forEach((title) => handleRemovePoster(title));
   };
 
+  // Finalize selected movies and save to backend
   const handleConfirmSelection = async (selectedTitle) => {
     const movies = selectedPosters.map((title) => ({
       title,
@@ -58,60 +62,28 @@ const SelectedMovies = ({
 
   return (
     <div
-      className="
-        fixed
-        top-16       
-        bottom-0         
-        left-0
-        flex
-        flex-col
-        bg-[#14181c]
-        shadow-lg
-        transition-transform
-        duration-300
-        ease-in-out
-        z-20
-        w-80           
-      "
+      className="fixed top-16 bottom-0 left-0 flex flex-col bg-[#14181c] shadow-lg transition-transform duration-300 ease-in-out z-20 w-80"
       style={{
         transform: isOpen
           ? "translateX(0)"
           : `translateX(-${PANEL_WIDTH_PX - BUTTON_VISIBLE_PX}px)`,
       }}
     >
-      {/* toggle button */}
+      {/* Toggle drawer open/close */}
       <button
         onClick={toggleDrawer}
-        className="
-          self-end
-          mt-4
-          mr-2
-          w-8 h-8
-          flex items-center justify-center
-          bg-[#ff8000] text-white
-          rounded-full
-          focus:outline-none
-        "
+        className="self-end mt-4 mr-2 w-8 h-8 flex items-center justify-center bg-[#ff8000] text-white rounded-full focus:outline-none"
         aria-label={isOpen ? "Close selections" : "Open selections"}
       >
         {isOpen ? "←" : "→"}
       </button>
 
-      <span
-        className="
-          absolute
-          top-1/2
-          right-[-4.5rem]
-          transform -translate-y-1/2 rotate-90
-          text-white text-base
-          font-bold
-          whitespace-nowrap
-          origin-center
-        "
-      >
+      {/* Rotated drawer label */}
+      <span className="absolute top-1/2 right-[-4.5rem] transform -translate-y-1/2 rotate-90 text-white text-base font-bold whitespace-nowrap origin-center">
         Movie Night Selections
       </span>
 
+      {/* Selected movie posters */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
         {titles.length === 0 ? (
           <p className="text-gray-500 text-sm">No movies selected.</p>
@@ -161,6 +133,7 @@ const SelectedMovies = ({
         )}
       </div>
 
+      {/* Action buttons */}
       <div className="p-4 flex flex-col items-center gap-3 text-white w-full">
         <button
           onClick={handleRandom}
@@ -176,7 +149,7 @@ const SelectedMovies = ({
         </button>
       </div>
 
-      {/* confirmation dialog */}
+      {/* Confirm selection popup */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-xl text-center animate-fade-in">
@@ -204,7 +177,7 @@ const SelectedMovies = ({
         </div>
       )}
 
-      {/* success toast */}
+      {/* Success notification */}
       {showSuccess && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#00e054] text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
           Selection logged successfully!

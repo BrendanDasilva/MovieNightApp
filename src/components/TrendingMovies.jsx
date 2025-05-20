@@ -14,7 +14,7 @@ const TrendingMovies = ({ movies, loading, error, onMovieClick }) => {
           onClick={() =>
             onMovieClick({
               title: movie.title,
-              year: movie.release_date?.split("-")[0],
+              year: movie.release_date?.split("-")[0], // Pass title and year on click
             })
           }
           className="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-lg  cursor-pointer transition-transform duration-200 hover:scale-105"
@@ -22,8 +22,8 @@ const TrendingMovies = ({ movies, loading, error, onMovieClick }) => {
           <img
             src={
               movie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : "/placeholder-poster.jpg"
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` // Use TMDB poster if available
+                : "/placeholder-poster.jpg" // Fallback if no poster
             }
             alt={movie.title}
             className="w-full h-full object-cover"
@@ -33,7 +33,7 @@ const TrendingMovies = ({ movies, loading, error, onMovieClick }) => {
             <div className="flex items-center mt-1">
               <span className="text-yellow-400 text-sm">★</span>
               <span className="text-white text-sm ml-1">
-                {movie.vote_average?.toFixed(1)}
+                {movie.vote_average?.toFixed(1)} {/* Display rating */}
               </span>
             </div>
           </div>

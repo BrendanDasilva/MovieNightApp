@@ -16,10 +16,10 @@ import Home from "./pages/Home";
 import Browse from "./pages/Browse";
 import Watchlist from "./pages/Watchlist";
 import Logs from "./pages/Logs";
-
 import SelectedMovies from "./components/SelectedMovies";
 import MovieModal from "./components/MovieModal";
 
+// Redirects unauthenticated users to login
 function AuthWrapper({ token, children }) {
   const location = useLocation();
   if (!token) {
@@ -28,6 +28,7 @@ function AuthWrapper({ token, children }) {
   return children;
 }
 
+// Fallback UI for unexpected errors
 function ErrorFallback({ error }) {
   return (
     <div className="p-4 bg-red-100 text-red-700">
@@ -38,17 +39,23 @@ function ErrorFallback({ error }) {
 }
 
 const App = () => {
+  // Auth + selection state
   const [token, setToken] = useState(
     () => localStorage.getItem("token") || null
   );
   const [selectedPosters, setSelectedPosters] = useState([]);
   const [posterMap, setPosterMap] = useState({});
   const [selectedMovie, setSelectedMovie] = useState(null);
+
+  // Alert state
   const [successAlert, setSuccessAlert] = useState(false);
   const [watchlistAlert, setWatchlistAlert] = useState(false);
-  const [watchlistTitles, setWatchlistTitles] = useState([]);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
 
+  // Watchlist cache state
+  const [watchlistTitles, setWatchlistTitles] = useState([]);
+
+  // Set up Axios auth headers and fetch watchlist on login
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -58,6 +65,7 @@ const App = () => {
     }
   }, [token]);
 
+  // Fetch user's watchlist titles
   const fetchWatchlistTitles = async () => {
     try {
       const res = await axios.get("http://localhost:3001/watchlist/me");
@@ -67,11 +75,13 @@ const App = () => {
     }
   };
 
+  // Handle login/register token state
   const handleAuth = (newToken) => {
     setToken(newToken);
     localStorage.setItem("token", newToken);
   };
 
+  // Handle logout and clear all relevant state
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem("token");
@@ -80,6 +90,7 @@ const App = () => {
     setWatchlistTitles([]);
   };
 
+  // Add a poster to the selection
   const handleAddPoster = async (title, posterUrl) => {
     if (selectedPosters.includes(title) || selectedPosters.length >= 3) return;
 
@@ -99,6 +110,7 @@ const App = () => {
     setPosterMap((prev) => ({ ...prev, [title]: posterUrl }));
   };
 
+  // Remove a poster from selection
   const handleRemovePoster = (title) => {
     setSelectedPosters((prev) => prev.filter((t) => t !== title));
     setPosterMap((prev) => {
@@ -108,6 +120,7 @@ const App = () => {
     });
   };
 
+  // Submit final selection to the backend
   const handleConfirmSelection = async (selectedTitle) => {
     try {
       const moviesToSave = selectedPosters.map((title) => ({
@@ -125,6 +138,7 @@ const App = () => {
     }
   };
 
+  // Add a movie to the watchlist and update cached titles
   const handleAddToWatchlist = async (movie) => {
     const token = localStorage.getItem("token");
     if (!token || !movie?.title) return;
@@ -141,6 +155,7 @@ const App = () => {
     }
   };
 
+  // Remove a movie from the watchlist and update local state
   const handleRemoveFromWatchlist = async (movie) => {
     const token = localStorage.getItem("token");
     if (!token || !movie?.title) return;
@@ -154,10 +169,7 @@ const App = () => {
       });
       setWatchlistRemoveAlert(true);
       setTimeout(() => setWatchlistRemoveAlert(false), 3000);
-
-      // ✅ Refresh state so button updates
       setWatchlistTitles((prev) => prev.filter((t) => t !== movie.title));
-
       console.log(`✅ Removed ${movie.title} from watchlist`);
     } catch (err) {
       console.error("❌ Failed to remove from watchlist", err.message);
@@ -167,30 +179,24 @@ const App = () => {
   return (
     <Router>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
+        {/* Toast alerts */}
         {successAlert && (
           <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-green-500 text-white px-6 py-3 rounded shadow-lg text-lg z-50 animate-fade-in-out">
             Selection saved successfully!
           </div>
         )}
-
         {watchlistAlert && (
-          <div
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 
-               bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50"
-          >
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50">
             Movie added to watchlist
           </div>
         )}
-
         {watchlistRemoveAlert && (
-          <div
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 
-               bg-red-500 text-white px-6 py-3 rounded shadow-lg z-50"
-          >
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg z-50">
             Movie removed from watchlist
           </div>
         )}
 
+        {/* Routes */}
         <Routes>
           <Route
             path="/login"
