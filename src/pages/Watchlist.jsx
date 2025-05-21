@@ -28,7 +28,7 @@ const Watchlist = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDecade, setSelectedDecade] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");
-  const [sortBy, setSortBy] = useState("yearDesc");
+  const [sortBy, setSortBy] = useState("createdDesc");
   const [genres, setGenres] = useState([]);
 
   const fetchCache = useRef({});
@@ -80,6 +80,10 @@ const Watchlist = ({
       const dateB = new Date(b.release_date);
 
       switch (sortBy) {
+        case "createdAsc":
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        case "createdDesc":
+          return new Date(b.createdAt) - new Date(a.createdAt);
         case "yearAsc":
           return dateA - dateB;
         case "yearDesc":
@@ -90,6 +94,10 @@ const Watchlist = ({
           return runtimeA - runtimeB;
         case "runtimeDesc":
           return runtimeB - runtimeA;
+        case "ratingAsc":
+          return (a.rating || 0) - (b.rating || 0);
+        case "ratingDesc":
+          return (b.rating || 0) - (a.rating || 0);
         default:
           return 0;
       }
