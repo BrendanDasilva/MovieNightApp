@@ -82,7 +82,7 @@ const MovieModal = ({
 
   // Check if movie is already in watchlist
   const isInWatchlist =
-    details?.title && watchlistTitles.includes(details.title);
+    details?.title && watchlistTitles?.includes(details.title);
 
   return (
     <div

@@ -261,6 +261,9 @@ const App = () => {
                         handleRemovePoster={handleRemovePoster}
                         selectedMovie={selectedMovie}
                         setSelectedMovie={setSelectedMovie}
+                        watchlistTitles={watchlistTitles}
+                        handleAddToWatchlist={handleAddToWatchlist}
+                        handleRemoveFromWatchlist={handleRemoveFromWatchlist}
                       />
                     }
                   />
@@ -274,6 +277,9 @@ const App = () => {
                         handleRemovePoster={handleRemovePoster}
                         setSelectedMovie={setSelectedMovie}
                         selectedMovie={selectedMovie}
+                        watchlistTitles={watchlistTitles}
+                        handleAddToWatchlist={handleAddToWatchlist}
+                        handleRemoveFromWatchlist={handleRemoveFromWatchlist}
                       />
                     }
                   />
@@ -289,6 +295,8 @@ const App = () => {
                         handleAddPoster={handleAddPoster}
                         handleRemovePoster={handleRemovePoster}
                         setSelectedMovie={setSelectedMovie}
+                        handleAddToWatchlist={handleAddToWatchlist}
+                        handleRemoveFromWatchlist={handleRemoveFromWatchlist}
                       />
                     }
                   />
