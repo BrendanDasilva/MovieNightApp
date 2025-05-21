@@ -18,6 +18,7 @@ const Home = ({
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
 }) => {
+  // State for latest selection log, trending movies, genres, selected genre, loading and error states
   const [latestLog, setLatestLog] = useState(null);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [genreMovies, setGenreMovies] = useState([]);
@@ -38,6 +39,7 @@ const Home = ({
 
   const [news, setNews] = useState([]);
 
+  // Fetch user log, trending movies, genres, and news on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,6 +74,7 @@ const Home = ({
     fetchData();
   }, []);
 
+  // Fetch genre-based movie list when selectedGenre changes
   useEffect(() => {
     const fetchGenreMovies = async () => {
       setLoading((prev) => ({ ...prev, genre: true }));
@@ -90,12 +93,14 @@ const Home = ({
 
   return (
     <div className="min-h-screen flex flex-col items-center">
+      {/* History Section */}
       <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <h2 className="text-3xl font-bold mb-4 text-center">Welcome back,</h2>
         <p className="text-center text-white text-lg mb-8">
           Here’s what you chose between last time…
         </p>
 
+        {/* Loading or show log posters */}
         {loading.history ? (
           <LoadingDots />
         ) : latestLog?.movies?.length ? (
@@ -121,13 +126,14 @@ const Home = ({
                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                   {movie.title}
                   {movie.isSelected && (
-                    <span className="ml-2 text-green-400">✓ Selected</span>
+                    <span className="ml-2 text-green-400">✓</span>
                   )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
+          // Placeholder if no history
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div
@@ -226,7 +232,7 @@ const Home = ({
         )}
       </div>
 
-      {/* News */}
+      {/* News Section */}
       <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Latest Movie News</h2>
@@ -234,6 +240,7 @@ const Home = ({
         {loading.news ? <LoadingDots /> : <LatestNews articles={news} />}
       </div>
 
+      {/* Footer */}
       <Footer />
     </div>
   );

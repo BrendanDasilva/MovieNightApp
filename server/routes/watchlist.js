@@ -20,24 +20,44 @@ router.get("/me", authMiddleware, async (req, res) => {
 // POST /watchlist/add — add one movie to watchlist
 router.post("/add", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const movie = req.body;
+  const { title } = req.body;
 
-  if (!movie?.title) {
+  if (!title) {
     return res.status(400).json({ error: "Missing movie title" });
   }
 
   try {
-    // Add movie if not already present (no duplicates due to $addToSet)
+    // Fetch full movie info from TMDB
+    const tmdbRes = await fetch(
+      `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
+    );
+    const data = await tmdbRes.json();
+
+    if (!data || !data.title || !data.release_date) {
+      return res
+        .status(400)
+        .json({ error: "TMDB data incomplete or not found" });
+    }
+
+    const enrichedMovie = {
+      title: data.title,
+      release_date: data.release_date,
+      genre: data.genre,
+      runtime: data.runtime,
+      rating: data.rating,
+    };
+
+    // Save movie if not already in watchlist
     const record = await UserWatchlist.findOneAndUpdate(
       { userId },
-      { $addToSet: { movies: movie } },
+      { $addToSet: { movies: enrichedMovie } },
       { upsert: true, new: true }
     );
 
     res.json(record.movies);
   } catch (err) {
-    console.error("❌ Failed to add movie:", err.message);
-    res.status(500).json({ error: "Failed to add movie to watchlist" });
+    console.error("❌ Failed to enrich and add movie:", err.message);
+    res.status(500).json({ error: "Failed to enrich or add movie" });
   }
 });
 

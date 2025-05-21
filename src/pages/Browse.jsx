@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import MovieModal from "../components/MovieModal";
 import MoviePoster from "../components/MoviePoster";
 
+// Browse page: allows user to search for TMDB movies and manage their watchlist
 const Browse = ({
   selectedPosters,
   posterMap,
@@ -17,12 +18,15 @@ const Browse = ({
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // User input for movie search
+  const [results, setResults] = useState([]); // Search results from TMDB
+  const [loading, setLoading] = useState(false); // Whether search is in progress
+
+  // Toast UI states
   const [watchlistAlert, setWatchlistAlert] = useState(false);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
 
+  // Search TMDB API when query changes (debounced)
   useEffect(() => {
     const searchMovies = async () => {
       if (searchQuery.length < 3) return;
@@ -45,7 +49,7 @@ const Browse = ({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Toasts */}
+      {/* Success/failure toast messages for watchlist actions */}
       {watchlistAlert && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50">
           Movie added to watchlist
@@ -57,6 +61,7 @@ const Browse = ({
         </div>
       )}
 
+      {/* Search section */}
       <div className="flex-grow px-8 mt-20">
         <div className="max-w-6xl mx-auto">
           <div className="w-full max-w-5xl mx-auto px-4 py-10 bg-[#202830] text-white rounded shadow mt-8 mb-12">
@@ -72,6 +77,7 @@ const Browse = ({
             </div>
           </div>
 
+          {/* Results Grid */}
           {results.length > 0 && (
             <div className="mt-8 bg-[#202830] rounded-lg shadow">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
@@ -103,6 +109,7 @@ const Browse = ({
         </div>
       </div>
 
+      {/* Movie Detail Modal */}
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}

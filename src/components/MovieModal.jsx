@@ -49,7 +49,7 @@ const MovieModal = ({
           actors: res.data.actors,
           language: res.data.language,
           country: res.data.country,
-          rating: res.data.vote_average,
+          rating: res.data.rating,
         };
 
         movieCache[cacheKey.current] = {

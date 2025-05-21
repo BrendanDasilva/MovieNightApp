@@ -4,6 +4,7 @@ import NavBar from "../components/NavBar";
 import LoadingDots from "../components/LoadingDots";
 import SearchBox from "../components/SearchBox";
 import MoviePoster from "../components/MoviePoster";
+import WatchlistFilters from "../components/WatchlistFilters";
 
 const CHUNK_SIZE = 20;
 
@@ -25,16 +26,79 @@ const Watchlist = ({
   const [isAppending, setIsAppending] = useState(false);
   const [posterErrors, setPosterErrors] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDecade, setSelectedDecade] = useState("All");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [sortBy, setSortBy] = useState("yearDesc");
+  const [genres, setGenres] = useState([]);
 
   const fetchCache = useRef({});
   const loadMoreRef = useRef(null);
 
-  const filteredMovies = useMemo(() => {
-    return allMovies.filter((movie) =>
-      movie.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [allMovies, searchQuery]);
+  // Fetch genres from TMDB to match genre spotlight list
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const res = await axios.get("/api/tmdb/genres");
+        const genreNames = res.data.map((g) => g.name);
+        setGenres(genreNames);
+      } catch (err) {
+        console.error("Failed to fetch genres", err);
+      }
+    };
+    fetchGenres();
+  }, []);
 
+  // Filter and sort logic
+  const filteredMovies = useMemo(() => {
+    let filtered = allMovies.filter((movie) => {
+      const titleMatch = movie.title
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+      const genreMatch =
+        selectedGenre === "All" || (movie.genre || "").includes(selectedGenre);
+
+      const year = parseInt(movie.release_date?.slice(0, 4), 10);
+      let decadeMatch = true;
+      if (selectedDecade !== "All") {
+        if (selectedDecade === "Earlier") {
+          decadeMatch = year < 1950;
+        } else {
+          const decade = parseInt(selectedDecade.slice(0, 4), 10);
+          decadeMatch = year >= decade && year < decade + 10;
+        }
+      }
+
+      return titleMatch && genreMatch && decadeMatch;
+    });
+
+    // Sorting logic
+    filtered.sort((a, b) => {
+      const runtimeA = parseInt(a.runtime, 10) || 0;
+      const runtimeB = parseInt(b.runtime, 10) || 0;
+      const dateA = new Date(a.release_date);
+      const dateB = new Date(b.release_date);
+
+      switch (sortBy) {
+        case "yearAsc":
+          return dateA - dateB;
+        case "yearDesc":
+          return dateB - dateA;
+        case "title":
+          return a.title.localeCompare(b.title);
+        case "runtimeAsc":
+          return runtimeA - runtimeB;
+        case "runtimeDesc":
+          return runtimeB - runtimeA;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [allMovies, searchQuery, selectedDecade, selectedGenre, sortBy]);
+
+  // Load user's saved watchlist
   const fetchWatchlist = async () => {
     setIsLoading(true);
     try {
@@ -51,6 +115,7 @@ const Watchlist = ({
     }
   };
 
+  // Load more posters on scroll
   const loadMore = () => {
     if (isAppending || visibleMovies.length >= filteredMovies.length) return;
     setIsAppending(true);
@@ -64,6 +129,7 @@ const Watchlist = ({
     }, 500);
   };
 
+  // Get posters by title
   const fetchPoster = async (title) => {
     if (!title) return null;
     if (fetchCache.current[title]) return fetchCache.current[title];
@@ -89,10 +155,12 @@ const Watchlist = ({
     }
   };
 
+  // Initial load of watchlist
   useEffect(() => {
     fetchWatchlist();
   }, []);
 
+  // Fetch missing posters for visible movies
   useEffect(() => {
     const fetchVisiblePosters = async () => {
       const toFetch = visibleMovies.filter(
@@ -106,6 +174,7 @@ const Watchlist = ({
     fetchVisiblePosters();
   }, [visibleMovies]);
 
+  // Fetch missing posters for selected movies
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
@@ -116,6 +185,7 @@ const Watchlist = ({
     fetchSelectedPosters();
   }, [selectedPosters]);
 
+  // Trigger loadMore when scrolled to bottom
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && visibleMovies.length < filteredMovies.length)
@@ -125,6 +195,7 @@ const Watchlist = ({
     return () => observer.disconnect();
   }, [visibleMovies, filteredMovies]);
 
+  // Reset visible chunk when filters/search change
   useEffect(() => {
     setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
   }, [filteredMovies]);
@@ -141,6 +212,17 @@ const Watchlist = ({
             setSearchQuery={setSearchQuery}
           />
         </div>
+
+        {/* Filters Section */}
+        <WatchlistFilters
+          selectedGenre={selectedGenre}
+          setSelectedGenre={setSelectedGenre}
+          selectedDecade={selectedDecade}
+          setSelectedDecade={setSelectedDecade}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          genres={genres}
+        />
 
         {filteredMovies.length > 0 && (
           <h3 className="mb-6 text-lg font-medium text-center">

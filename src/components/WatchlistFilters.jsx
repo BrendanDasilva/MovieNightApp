@@ -15,8 +15,8 @@ const decades = [
 ];
 
 const sortOptions = [
-  { value: "yearDesc", label: "Year (Newest)" },
-  { value: "yearAsc", label: "Year (Oldest)" },
+  { value: "yearDesc", label: "Release Date (Newest)" },
+  { value: "yearAsc", label: "Release Date (Oldest)" },
   { value: "title", label: "Film Name" },
   { value: "runtimeAsc", label: "Length (Short to Long)" },
   { value: "runtimeDesc", label: "Length (Long to Short)" },
