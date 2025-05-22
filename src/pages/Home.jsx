@@ -17,6 +17,7 @@ const Home = ({
   watchlistTitles,
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
+  isDrawerOpen,
 }) => {
   // State for latest selection log, trending movies, genres, selected genre, loading and error states
   const [latestLog, setLatestLog] = useState(null);
@@ -28,6 +29,7 @@ const Home = ({
     name: "Action",
   });
 
+  // State for loading and error messages
   const [loading, setLoading] = useState({
     history: true,
     trending: true,
@@ -35,8 +37,11 @@ const Home = ({
     news: true,
     genres: true,
   });
+
+  // State for error messages
   const [errors, setErrors] = useState({});
 
+  // State for news articles
   const [news, setNews] = useState([]);
 
   // Fetch user log, trending movies, genres, and news on mount
@@ -92,15 +97,18 @@ const Home = ({
   }, [selectedGenre]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div
+      className={`min-h-screen flex flex-col items-center transition-all duration-300 ${
+        isDrawerOpen ? "pl-[420px]" : "pl-12"
+      }`}
+    >
       {/* History Section */}
-      <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] px-[50px] mt-28 mb-8 py-10 bg-[#202830] text-white rounded shadow">
         <h2 className="text-3xl font-bold mb-4 text-center">Welcome back,</h2>
         <p className="text-center text-white text-lg mb-8">
           Here’s what you chose between last time…
         </p>
 
-        {/* Loading or show log posters */}
         {loading.history ? (
           <LoadingDots />
         ) : latestLog?.movies?.length ? (
@@ -133,7 +141,6 @@ const Home = ({
             ))}
           </div>
         ) : (
-          // Placeholder if no history
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div
@@ -148,7 +155,7 @@ const Home = ({
       </div>
 
       {/* Trending Section */}
-      <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Trending This Week</h2>
         </div>
@@ -181,7 +188,7 @@ const Home = ({
       </div>
 
       {/* Genre Spotlight */}
-      <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Popular in {selectedGenre.name}
@@ -233,14 +240,13 @@ const Home = ({
       </div>
 
       {/* News Section */}
-      <div className="w-full max-w-5xl mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Latest Movie News</h2>
         </div>
         {loading.news ? <LoadingDots /> : <LatestNews articles={news} />}
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

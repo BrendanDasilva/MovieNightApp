@@ -55,6 +55,9 @@ const App = () => {
   // Watchlist cache state
   const [watchlistTitles, setWatchlistTitles] = useState([]);
 
+  // state for drawer tracking
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+
   // Set up Axios auth headers and fetch watchlist on login
   useEffect(() => {
     if (token) {
@@ -232,6 +235,8 @@ const App = () => {
                   handleAddPoster={handleAddPoster}
                   allWatchlistTitles={posterMap ? Object.keys(posterMap) : []}
                   handleConfirmSelection={handleConfirmSelection}
+                  isDrawerOpen={isDrawerOpen}
+                  setIsDrawerOpen={setIsDrawerOpen}
                 />
 
                 {selectedMovie && (
@@ -264,6 +269,7 @@ const App = () => {
                         watchlistTitles={watchlistTitles}
                         handleAddToWatchlist={handleAddToWatchlist}
                         handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                        isDrawerOpen={isDrawerOpen}
                       />
                     }
                   />
@@ -280,6 +286,7 @@ const App = () => {
                         watchlistTitles={watchlistTitles}
                         handleAddToWatchlist={handleAddToWatchlist}
                         handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                        isDrawerOpen={isDrawerOpen}
                       />
                     }
                   />
@@ -297,10 +304,14 @@ const App = () => {
                         setSelectedMovie={setSelectedMovie}
                         handleAddToWatchlist={handleAddToWatchlist}
                         handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                        isDrawerOpen={isDrawerOpen}
                       />
                     }
                   />
-                  <Route path="/logs" element={<Logs />} />
+                  <Route
+                    path="/logs"
+                    element={<Logs isDrawerOpen={isDrawerOpen} />}
+                  />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AuthWrapper>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 // Panel and toggle button sizing constants
-const PANEL_WIDTH_PX = 320;
+const PANEL_WIDTH_PX = 420;
 const BUTTON_VISIBLE_PX = 48;
 
 const SelectedMovies = ({
@@ -14,14 +14,15 @@ const SelectedMovies = ({
   allWatchlistTitles,
   setSelectedPosters,
   setPosterMap,
+  isDrawerOpen,
+  setIsDrawerOpen,
 }) => {
-  const [isOpen, setIsOpen] = useState(false); // controls drawer open/close
   const [showConfirm, setShowConfirm] = useState(null); // for selection confirmation
   const [showSuccess, setShowSuccess] = useState(false); // shows toast on success
 
-  const toggleDrawer = () => setIsOpen((open) => !open);
-
   const titles = selectedPosters.filter((t) => t); // clean list of selected movie titles
+
+  const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
   // Randomly select up to 3 movies from user's watchlist
   const handleRandom = () => {
@@ -62,28 +63,28 @@ const SelectedMovies = ({
 
   return (
     <div
-      className="fixed top-16 bottom-0 left-0 flex flex-col bg-[#14181c] shadow-lg transition-transform duration-300 ease-in-out z-20 w-80"
+      className="fixed top-16 bottom-0 left-0 flex flex-col bg-[#14181c] shadow-lg transition-transform duration-300 ease-in-out z-20 w-[420px]"
       style={{
-        transform: isOpen
+        transform: isDrawerOpen
           ? "translateX(0)"
           : `translateX(-${PANEL_WIDTH_PX - BUTTON_VISIBLE_PX}px)`,
       }}
     >
-      {/* Toggle drawer open/close */}
+      {/* Toggle drawer */}
       <button
         onClick={toggleDrawer}
         className="self-end mt-4 mr-2 w-8 h-8 flex items-center justify-center bg-[#ff8000] text-white rounded-full focus:outline-none"
-        aria-label={isOpen ? "Close selections" : "Open selections"}
+        aria-label={isDrawerOpen ? "Close selections" : "Open selections"}
       >
-        {isOpen ? "←" : "→"}
+        {isDrawerOpen ? "←" : "→"}
       </button>
 
-      {/* Rotated drawer label */}
+      {/* Rotated label */}
       <span className="absolute top-1/2 right-[-4.5rem] transform -translate-y-1/2 rotate-90 text-white text-base font-bold whitespace-nowrap origin-center">
         Movie Night Selections
       </span>
 
-      {/* Selected movie posters */}
+      {/* Selected movies */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
         {titles.length === 0 ? (
           <p className="text-gray-500 text-sm">No movies selected.</p>
@@ -177,7 +178,7 @@ const SelectedMovies = ({
         </div>
       )}
 
-      {/* Success notification */}
+      {/* Success toast */}
       {showSuccess && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#00e054] text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
           Selection logged successfully!
