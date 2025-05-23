@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 // Panel and toggle button sizing constants
 const PANEL_WIDTH_PX = 420;
@@ -63,13 +64,26 @@ const SelectedMovies = ({
 
   return (
     <div
-      className="fixed top-16 bottom-0 left-0 flex flex-col bg-[#14181c] shadow-lg transition-transform duration-300 ease-in-out z-20 w-[420px]"
+      className="fixed top-0 bottom-0 left-0 flex flex-col bg-[#14181c] shadow-lg transition-transform duration-300 ease-in-out z-50 w-[420px]"
       style={{
         transform: isDrawerOpen
           ? "translateX(0)"
           : `translateX(-${PANEL_WIDTH_PX - BUTTON_VISIBLE_PX}px)`,
       }}
     >
+      {/* Header inside drawer */}
+      <div className="px-4 py-4 flex justify-center">
+        <Link
+          to="/"
+          className="hover:opacity-80 transition-opacity text-center"
+        >
+          <h1 className="text-xl font-semibold text-white">🎬 Movie Night</h1>
+          <span className="text-xs text-white opacity-75 block">
+            Powered by TMDB
+          </span>
+        </Link>
+      </div>
+
       {/* Toggle drawer */}
       <button
         onClick={toggleDrawer}
@@ -86,52 +100,59 @@ const SelectedMovies = ({
 
       {/* Selected movies */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
-        {titles.length === 0 ? (
-          <p className="text-gray-500 text-sm">No movies selected.</p>
-        ) : (
-          <div className="space-y-6 flex flex-col items-center justify-center w-full">
-            {titles.map((title, idx) => {
-              const poster = posterMap[title];
-              return (
-                <div
-                  key={idx}
-                  className="flex flex-col items-center text-center space-y-2"
-                >
-                  {poster ? (
-                    <img
-                      src={poster}
-                      alt={title}
-                      onClick={() => setSelectedMovie({ title })}
-                      className="w-32 h-auto object-cover rounded cursor-pointer"
-                    />
-                  ) : (
-                    <div className="w-24 h-36 bg-gray-500 rounded animate-pulse" />
-                  )}
-                  <span className="text-white text-sm font-medium">
-                    {title}
+        <div className="space-y-6 flex flex-col items-center justify-center w-full">
+          {[0, 1, 2].map((slotIdx) => {
+            const title = selectedPosters[slotIdx];
+            const poster = posterMap[title];
+
+            return (
+              <div
+                key={slotIdx}
+                className="flex flex-col items-center text-center space-y-2"
+              >
+                {title && poster ? (
+                  <img
+                    src={poster}
+                    alt={title}
+                    onClick={() => setSelectedMovie({ title })}
+                    className="w-36 h-[13.5rem] object-cover rounded cursor-pointer"
+                  />
+                ) : (
+                  <div className="w-36 h-[13.5rem] bg-gray-700 rounded opacity-50" />
+                )}
+
+                {/* Movie title and controls */}
+                {title ? (
+                  <>
+                    <span className="text-white text-sm font-medium">
+                      {title}
+                    </span>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setShowConfirm(title)}
+                        className="text-[#00e054] hover:underline text-xs"
+                      >
+                        Select
+                      </button>
+                      <button
+                        onClick={() => handleRemovePoster(title)}
+                        className="text-red-500 hover:underline text-xs"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500 italic">
+                    Empty slot
                   </span>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setShowConfirm(title)}
-                      className="text-[#00e054] hover:underline text-xs"
-                    >
-                      Select
-                    </button>
-                    <button
-                      onClick={() => handleRemovePoster(title)}
-                      className="text-red-500 hover:underline text-xs"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  {idx < titles.length - 1 && (
-                    <hr className="w-full border-gray-700 mt-4" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                )}
+
+                {slotIdx < 2 && <hr className="w-full border-gray-700 mt-4" />}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Action buttons */}
