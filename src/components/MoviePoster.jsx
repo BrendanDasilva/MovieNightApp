@@ -52,12 +52,12 @@ const MoviePoster = ({
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={toggleSelection}
-          className="p-1 rounded-full bg-black/70 hover:bg-black text-white"
+          className="p-2 rounded-full bg-black/70 hover:bg-black hover:scale-105 text-white"
         >
           {isSelected ? (
-            <FiMinusSquare size={20} />
+            <FiMinusSquare size={25} />
           ) : (
-            <FiPlusSquare size={20} />
+            <FiPlusSquare size={25} />
           )}
         </button>
       </div>

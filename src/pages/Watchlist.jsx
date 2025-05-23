@@ -5,6 +5,7 @@ import SearchBox from "../components/SearchBox";
 import MoviePoster from "../components/MoviePoster";
 import WatchlistFilters from "../components/WatchlistFilters";
 import PageWrapper from "../components/PageWrapper";
+import Footer from "../components/Footer";
 
 // Number of movies to load at a time for infinite scroll
 const CHUNK_SIZE = 20;
@@ -212,69 +213,72 @@ const Watchlist = ({
   }, [filteredMovies]);
 
   return (
-    <PageWrapper isDrawerOpen={isDrawerOpen}>
-      {/* Outer content container */}
-      <div className="w-full max-w-5xl mx-auto mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
-        {/* Page heading and search input */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-4">Your Movie Watchlist</h2>
-          <SearchBox
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-
-        {/* Filter and sort controls */}
-        <WatchlistFilters
-          selectedGenre={selectedGenre}
-          setSelectedGenre={setSelectedGenre}
-          selectedDecade={selectedDecade}
-          setSelectedDecade={setSelectedDecade}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          genres={genres}
-        />
-
-        {/* Results summary */}
-        {filteredMovies.length > 0 && (
-          <h3 className="mb-6 text-lg font-medium text-center">
-            {filteredMovies.length} movies found
-          </h3>
-        )}
-
-        {/* Loading state */}
-        {isLoading && <LoadingDots />}
-
-        {/* Poster grid */}
-        {!isLoading && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
-            {visibleMovies.map((movie, idx) => (
-              <MoviePoster
-                key={idx}
-                movie={movie}
-                posterMap={posterMap}
-                setSelectedMovie={setSelectedMovie}
-                selectedPosters={selectedPosters}
-                handleAddPoster={handleAddPoster}
-                handleRemovePoster={handleRemovePoster}
-                watchlistTitles={allMovies.map((m) => m.title)}
-                handleAddToWatchlist={() => handleAddToWatchlist(movie)}
-                handleRemoveFromWatchlist={async () => {
-                  await handleRemoveFromWatchlist(movie);
-                  setAllMovies((prev) =>
-                    prev.filter((m) => m.title !== movie.title)
-                  );
-                }}
-              />
-            ))}
+    <div className="min-h-screen flex flex-col">
+      <PageWrapper isDrawerOpen={isDrawerOpen}>
+        {/* Outer content container */}
+        <div className="w-full max-w-5xl mx-auto mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+          {/* Page heading and search input */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-4">Your Movie Watchlist</h2>
+            <SearchBox
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
           </div>
-        )}
 
-        {/* Appending spinner */}
-        {!isLoading && isAppending && <LoadingDots />}
-        <div ref={loadMoreRef} className="h-10 mt-10" />
-      </div>
-    </PageWrapper>
+          {/* Filter and sort controls */}
+          <WatchlistFilters
+            selectedGenre={selectedGenre}
+            setSelectedGenre={setSelectedGenre}
+            selectedDecade={selectedDecade}
+            setSelectedDecade={setSelectedDecade}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            genres={genres}
+          />
+
+          {/* Results summary */}
+          {filteredMovies.length > 0 && (
+            <h3 className="mb-6 text-lg font-medium text-center">
+              {filteredMovies.length} movies found
+            </h3>
+          )}
+
+          {/* Loading state */}
+          {isLoading && <LoadingDots />}
+
+          {/* Poster grid */}
+          {!isLoading && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
+              {visibleMovies.map((movie, idx) => (
+                <MoviePoster
+                  key={idx}
+                  movie={movie}
+                  posterMap={posterMap}
+                  setSelectedMovie={setSelectedMovie}
+                  selectedPosters={selectedPosters}
+                  handleAddPoster={handleAddPoster}
+                  handleRemovePoster={handleRemovePoster}
+                  watchlistTitles={allMovies.map((m) => m.title)}
+                  handleAddToWatchlist={() => handleAddToWatchlist(movie)}
+                  handleRemoveFromWatchlist={async () => {
+                    await handleRemoveFromWatchlist(movie);
+                    setAllMovies((prev) =>
+                      prev.filter((m) => m.title !== movie.title)
+                    );
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Appending spinner */}
+          {!isLoading && isAppending && <LoadingDots />}
+          <div ref={loadMoreRef} className="h-10 mt-10" />
+        </div>
+      </PageWrapper>
+      <Footer />
+    </div>
   );
 };
 

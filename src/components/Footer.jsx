@@ -7,22 +7,22 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and brief description */}
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-center md:items-center">
             <div className="flex items-center space-x-2">
               <span className="text-white font-bold text-xl">
                 🎬 Movie Night
               </span>
             </div>
-            <p className="mt-4 text-sm text-gray-400 text-center md:text-left">
+            <p className="mt-4 text-sm text-gray-400 text-center md:text-center">
               Your personal helper in selecting movies for your next movie
               night.
             </p>
           </div>
 
           {/* Footer navigation links */}
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-center md:items-center">
             <h3 className="text-white font-semibold mb-4">Navigation</h3>
-            <div className="flex flex-col items-center md:items-start space-y-2">
+            <div className="flex flex-col items-center md:items-center space-y-2">
               <a
                 href="/"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -51,9 +51,9 @@ const Footer = () => {
           </div>
 
           {/* Contact info and social links */}
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-center md:items-center">
             <h3 className="text-white font-semibold mb-4">Contact</h3>
-            <div className="flex flex-col items-center md:items-start space-y-2">
+            <div className="flex flex-col items-center md:items-center space-y-2">
               <a
                 href="mailto:support@cineselections.com"
                 className="text-gray-400 hover:text-white transition-colors"

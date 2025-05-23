@@ -225,7 +225,7 @@ const App = () => {
             path="/*"
             element={
               <AuthWrapper token={token}>
-                <NavBar onLogout={handleLogout} />
+                <NavBar onLogout={handleLogout} isDrawerOpen={isDrawerOpen} />
 
                 <SelectedMovies
                   selectedPosters={selectedPosters}

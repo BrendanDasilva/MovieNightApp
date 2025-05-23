@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = ({ onLogout }) => {
+const Navbar = ({ onLogout, isDrawerOpen }) => {
   const navigate = useNavigate();
 
   // Handle logout and redirect to login page
@@ -12,8 +12,13 @@ const Navbar = ({ onLogout }) => {
   return (
     <nav className="w-full bg-[#14181c] text-white py-4 shadow-md fixed top-0 left-0 z-10">
       <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-        {/* Logo and branding */}
-        <Link to="/" className="hover:opacity-80 transition-opacity">
+        {/* Logo and branding: invisible when drawer is open to preserve spacing */}
+        <Link
+          to="/"
+          className={`hover:opacity-80 transition-opacity ${
+            isDrawerOpen ? "invisible pointer-events-none" : ""
+          }`}
+        >
           <div>
             <h1 className="text-xl font-semibold">🎬 Movie Night</h1>
             <span className="text-xs opacity-75 block">Powered by TMDB</span>
