@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
-import NavBar from "../components/NavBar";
 import LoadingDots from "../components/LoadingDots";
 import SearchBox from "../components/SearchBox";
 import MoviePoster from "../components/MoviePoster";
 import WatchlistFilters from "../components/WatchlistFilters";
+import PageWrapper from "../components/PageWrapper";
 
+// Number of movies to load at a time for infinite scroll
 const CHUNK_SIZE = 20;
 
+// Watchlist page: shows saved movies, allows filtering/sorting/searching
 const Watchlist = ({
-  onLogout,
+  // Movie and UI state
   selectedPosters,
   setSelectedPosters,
   posterMap,
@@ -19,22 +21,23 @@ const Watchlist = ({
   setSelectedMovie,
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
+  isDrawerOpen,
 }) => {
-  const [allMovies, setAllMovies] = useState([]);
-  const [visibleMovies, setVisibleMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAppending, setIsAppending] = useState(false);
-  const [posterErrors, setPosterErrors] = useState({});
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDecade, setSelectedDecade] = useState("All");
-  const [selectedGenre, setSelectedGenre] = useState("All");
-  const [sortBy, setSortBy] = useState("createdDesc");
-  const [genres, setGenres] = useState([]);
+  const [allMovies, setAllMovies] = useState([]); // full watchlist
+  const [visibleMovies, setVisibleMovies] = useState([]); // chunked view for infinite scroll
+  const [isLoading, setIsLoading] = useState(false); // initial fetch state
+  const [isAppending, setIsAppending] = useState(false); // loading additional chunks
+  const [posterErrors, setPosterErrors] = useState({}); // poster load errors
+  const [searchQuery, setSearchQuery] = useState(""); // search input
+  const [selectedDecade, setSelectedDecade] = useState("All"); // decade filter
+  const [selectedGenre, setSelectedGenre] = useState("All"); // genre filter
+  const [sortBy, setSortBy] = useState("createdDesc"); // sorting criteria
+  const [genres, setGenres] = useState([]); // available genres
 
-  const fetchCache = useRef({});
-  const loadMoreRef = useRef(null);
+  const fetchCache = useRef({}); // avoids duplicate poster fetches
+  const loadMoreRef = useRef(null); // trigger element for infinite scroll
 
-  // Fetch genres from TMDB to match genre spotlight list
+  // Fetch available genres on mount
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -48,7 +51,7 @@ const Watchlist = ({
     fetchGenres();
   }, []);
 
-  // Filter and sort logic
+  // Derived movie list based on search, filter, and sort criteria
   const filteredMovies = useMemo(() => {
     let filtered = allMovies.filter((movie) => {
       const titleMatch = movie.title
@@ -106,7 +109,7 @@ const Watchlist = ({
     return filtered;
   }, [allMovies, searchQuery, selectedDecade, selectedGenre, sortBy]);
 
-  // Load user's saved watchlist
+  // Initial fetch of user's watchlist from backend
   const fetchWatchlist = async () => {
     setIsLoading(true);
     try {
@@ -123,7 +126,7 @@ const Watchlist = ({
     }
   };
 
-  // Load more posters on scroll
+  // Load additional posters when scrolled to bottom
   const loadMore = () => {
     if (isAppending || visibleMovies.length >= filteredMovies.length) return;
     setIsAppending(true);
@@ -137,7 +140,7 @@ const Watchlist = ({
     }, 500);
   };
 
-  // Get posters by title
+  // Fetch poster from TMDB if not already cached
   const fetchPoster = async (title) => {
     if (!title) return null;
     if (fetchCache.current[title]) return fetchCache.current[title];
@@ -163,12 +166,12 @@ const Watchlist = ({
     }
   };
 
-  // Initial load of watchlist
+  // Trigger initial fetch
   useEffect(() => {
     fetchWatchlist();
   }, []);
 
-  // Fetch missing posters for visible movies
+  // Fetch posters for currently visible movies
   useEffect(() => {
     const fetchVisiblePosters = async () => {
       const toFetch = visibleMovies.filter(
@@ -182,7 +185,7 @@ const Watchlist = ({
     fetchVisiblePosters();
   }, [visibleMovies]);
 
-  // Fetch missing posters for selected movies
+  // Ensure selected posters are fetched
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
@@ -193,7 +196,7 @@ const Watchlist = ({
     fetchSelectedPosters();
   }, [selectedPosters]);
 
-  // Trigger loadMore when scrolled to bottom
+  // Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && visibleMovies.length < filteredMovies.length)
@@ -203,16 +206,16 @@ const Watchlist = ({
     return () => observer.disconnect();
   }, [visibleMovies, filteredMovies]);
 
-  // Reset visible chunk when filters/search change
+  // Reset chunked list when filters change
   useEffect(() => {
     setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
   }, [filteredMovies]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      <NavBar onLogout={onLogout} />
-
-      <div className="w-full max-w-5xl mt-28 mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+    <PageWrapper isDrawerOpen={isDrawerOpen}>
+      {/* Outer content container */}
+      <div className="w-full max-w-5xl mx-auto mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+        {/* Page heading and search input */}
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-4">Your Movie Watchlist</h2>
           <SearchBox
@@ -221,7 +224,7 @@ const Watchlist = ({
           />
         </div>
 
-        {/* Filters Section */}
+        {/* Filter and sort controls */}
         <WatchlistFilters
           selectedGenre={selectedGenre}
           setSelectedGenre={setSelectedGenre}
@@ -232,14 +235,17 @@ const Watchlist = ({
           genres={genres}
         />
 
+        {/* Results summary */}
         {filteredMovies.length > 0 && (
           <h3 className="mb-6 text-lg font-medium text-center">
             {filteredMovies.length} movies found
           </h3>
         )}
 
+        {/* Loading state */}
         {isLoading && <LoadingDots />}
 
+        {/* Poster grid */}
         {!isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
             {visibleMovies.map((movie, idx) => (
@@ -264,10 +270,11 @@ const Watchlist = ({
           </div>
         )}
 
+        {/* Appending spinner */}
         {!isLoading && isAppending && <LoadingDots />}
         <div ref={loadMoreRef} className="h-10 mt-10" />
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 

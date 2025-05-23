@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingDots from "../components/LoadingDots";
-import TrendingMovies from "../components/TrendingMovies";
-import GenreSpotlight from "../components/GenreSpotlight";
 import LatestNews from "../components/LatestNews";
 import Footer from "../components/Footer";
 import MoviePoster from "../components/MoviePoster";
+import PageWrapper from "../components/PageWrapper";
 
+// Home page: shows last selection log, trending films, spotlight genre, and news
 const Home = ({
   selectedPosters,
   posterMap,
@@ -19,17 +19,17 @@ const Home = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
-  // State for latest selection log, trending movies, genres, selected genre, loading and error states
-  const [latestLog, setLatestLog] = useState(null);
-  const [trendingMovies, setTrendingMovies] = useState([]);
-  const [genreMovies, setGenreMovies] = useState([]);
-  const [genres, setGenres] = useState([]);
+  // App-wide data
+  const [latestLog, setLatestLog] = useState(null); // user's last selection
+  const [trendingMovies, setTrendingMovies] = useState([]); // trending TMDB titles
+  const [genreMovies, setGenreMovies] = useState([]); // genre-based selection
+  const [genres, setGenres] = useState([]); // list of genres from TMDB
   const [selectedGenre, setSelectedGenre] = useState({
     id: 28,
     name: "Action",
   });
 
-  // State for loading and error messages
+  // Loading and error state trackers
   const [loading, setLoading] = useState({
     history: true,
     trending: true,
@@ -37,14 +37,12 @@ const Home = ({
     news: true,
     genres: true,
   });
-
-  // State for error messages
   const [errors, setErrors] = useState({});
 
-  // State for news articles
+  // News feed
   const [news, setNews] = useState([]);
 
-  // Fetch user log, trending movies, genres, and news on mount
+  // Fetch logs, trending, genres, and news when page mounts
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,7 +56,6 @@ const Home = ({
           axios.get("/api/tmdb/genres"),
           axios.get("/api/news"),
         ]);
-
         setLatestLog(logRes.data);
         setTrendingMovies(trendingRes.data);
         setGenres(genresRes.data);
@@ -79,7 +76,7 @@ const Home = ({
     fetchData();
   }, []);
 
-  // Fetch genre-based movie list when selectedGenre changes
+  // Fetch genre-specific movies when user changes genre dropdown
   useEffect(() => {
     const fetchGenreMovies = async () => {
       setLoading((prev) => ({ ...prev, genre: true }));
@@ -97,18 +94,15 @@ const Home = ({
   }, [selectedGenre]);
 
   return (
-    <div
-      className={`min-h-screen flex flex-col items-center transition-all duration-300 ${
-        isDrawerOpen ? "pl-[420px]" : "pl-12"
-      }`}
-    >
-      {/* History Section */}
-      <div className="w-full max-w-[1600px] px-[50px] mt-28 mb-8 py-10 bg-[#202830] text-white rounded shadow">
+    <PageWrapper isDrawerOpen={isDrawerOpen}>
+      {/* ---- Last Movie Night Selection ---- */}
+      <div className="w-full max-w-[1600px] mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <h2 className="text-3xl font-bold mb-4 text-center">Welcome back,</h2>
         <p className="text-center text-white text-lg mb-8">
           Here’s what you chose between last time…
         </p>
 
+        {/* Show latest log or placeholder posters */}
         {loading.history ? (
           <LoadingDots />
         ) : latestLog?.movies?.length ? (
@@ -120,6 +114,7 @@ const Home = ({
                   !movie.isSelected ? "grayscale" : ""
                 }`}
               >
+                {/* Poster image or fallback box */}
                 {movie.poster ? (
                   <img
                     src={movie.poster}
@@ -131,6 +126,7 @@ const Home = ({
                     {movie.title || `Poster ${i + 1}`}
                   </div>
                 )}
+                {/* Movie label with checkmark */}
                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                   {movie.title}
                   {movie.isSelected && (
@@ -141,6 +137,7 @@ const Home = ({
             ))}
           </div>
         ) : (
+          // Placeholder if no past logs exist
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div
@@ -155,7 +152,7 @@ const Home = ({
       </div>
 
       {/* Trending Section */}
-      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Trending This Week</h2>
         </div>
@@ -188,11 +185,13 @@ const Home = ({
       </div>
 
       {/* Genre Spotlight */}
-      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Popular in {selectedGenre.name}
           </h2>
+
+          {/* Genre selector dropdown */}
           <select
             value={selectedGenre.id}
             onChange={(e) => {
@@ -240,7 +239,7 @@ const Home = ({
       </div>
 
       {/* News Section */}
-      <div className="w-full max-w-[1600px] px-[50px] mb-8 py-10 bg-[#202830] text-white rounded shadow">
+      <div className="w-full max-w-[1600px] mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Latest Movie News</h2>
         </div>
@@ -248,7 +247,7 @@ const Home = ({
       </div>
 
       <Footer />
-    </div>
+    </PageWrapper>
   );
 };
 

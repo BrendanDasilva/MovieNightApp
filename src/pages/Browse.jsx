@@ -3,10 +3,10 @@ import axios from "axios";
 import SearchBox from "../components/SearchBox";
 import LoadingDots from "../components/LoadingDots";
 import Footer from "../components/Footer";
-import MovieModal from "../components/MovieModal";
 import MoviePoster from "../components/MoviePoster";
+import PageWrapper from "../components/PageWrapper";
 
-// Browse page: allows user to search for TMDB movies and manage their watchlist
+// Browse page: allows user to search TMDB movies and add/remove them from their watchlist
 const Browse = ({
   selectedPosters,
   posterMap,
@@ -17,16 +17,18 @@ const Browse = ({
   watchlistTitles,
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
+  isDrawerOpen,
 }) => {
-  const [searchQuery, setSearchQuery] = useState(""); // User input for movie search
-  const [results, setResults] = useState([]); // Search results from TMDB
-  const [loading, setLoading] = useState(false); // Whether search is in progress
+  // Search and result state
+  const [searchQuery, setSearchQuery] = useState(""); // user input
+  const [results, setResults] = useState([]); // search result list
+  const [loading, setLoading] = useState(false); // loading indicator
 
-  // Toast UI states
+  // Toast alerts for watchlist changes
   const [watchlistAlert, setWatchlistAlert] = useState(false);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
 
-  // Search TMDB API when query changes (debounced)
+  // Fetch search results from TMDB when query changes (debounced)
   useEffect(() => {
     const searchMovies = async () => {
       if (searchQuery.length < 3) return;
@@ -42,88 +44,74 @@ const Browse = ({
         setLoading(false);
       }
     };
-
     const debounceTimer = setTimeout(searchMovies, 500);
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Success/failure toast messages for watchlist actions */}
+      {/* Toast: movie added */}
       {watchlistAlert && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50">
           Movie added to watchlist
         </div>
       )}
+
+      {/* Toast: movie removed */}
       {watchlistRemoveAlert && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg z-50">
           Movie removed from watchlist
         </div>
       )}
 
-      {/* Search section */}
-      <div className="flex-grow px-8 mt-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="w-full max-w-5xl mx-auto px-4 py-10 bg-[#202830] text-white rounded shadow mt-8 mb-12">
-            <div className="text-center space-y-4">
-              <h1 className="text-4xl font-bold mt-4">Browse Movies</h1>
-              <div className="max-w-3xl text-black mx-auto">
-                <SearchBox
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
+      {/* Main content container with layout margin */}
+      <PageWrapper isDrawerOpen={isDrawerOpen}>
+        {/* Search form section */}
+        <div className="w-full max-w-5xl mx-auto px-4 py-10 bg-[#202830] text-white rounded shadow mb-12">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold mt-4">Browse Movies</h1>
+            <div className="max-w-3xl text-black mx-auto">
+              <SearchBox
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
+            </div>
+            {loading && <LoadingDots />}
+          </div>
+        </div>
+
+        {/* Display results grid if available */}
+        {results.length > 0 && (
+          <div className="mt-8 bg-[#202830] rounded-lg shadow">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
+              {results.map((movie, idx) => (
+                <MoviePoster
+                  key={idx}
+                  movie={movie}
+                  selectedPosters={selectedPosters}
+                  posterMap={posterMap}
+                  handleAddPoster={handleAddPoster}
+                  handleRemovePoster={handleRemovePoster}
+                  setSelectedMovie={setSelectedMovie}
+                  watchlistTitles={watchlistTitles}
+                  handleAddToWatchlist={async (m) => {
+                    await handleAddToWatchlist(m);
+                    setWatchlistAlert(true);
+                    setTimeout(() => setWatchlistAlert(false), 3000);
+                  }}
+                  handleRemoveFromWatchlist={async (m) => {
+                    await handleRemoveFromWatchlist(m);
+                    setWatchlistRemoveAlert(true);
+                    setTimeout(() => setWatchlistRemoveAlert(false), 3000);
+                  }}
                 />
-              </div>
-              {loading && <LoadingDots />}
+              ))}
             </div>
           </div>
+        )}
+      </PageWrapper>
 
-          {/* Results Grid */}
-          {results.length > 0 && (
-            <div className="mt-8 bg-[#202830] rounded-lg shadow">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
-                {results.map((movie, idx) => (
-                  <MoviePoster
-                    key={idx}
-                    movie={movie}
-                    selectedPosters={selectedPosters}
-                    posterMap={posterMap}
-                    handleAddPoster={handleAddPoster}
-                    handleRemovePoster={handleRemovePoster}
-                    setSelectedMovie={setSelectedMovie}
-                    watchlistTitles={watchlistTitles}
-                    handleAddToWatchlist={async (m) => {
-                      await handleAddToWatchlist(m);
-                      setWatchlistAlert(true);
-                      setTimeout(() => setWatchlistAlert(false), 3000);
-                    }}
-                    handleRemoveFromWatchlist={async (m) => {
-                      await handleRemoveFromWatchlist(m);
-                      setWatchlistRemoveAlert(true);
-                      setTimeout(() => setWatchlistRemoveAlert(false), 3000);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Movie Detail Modal */}
-      {selectedMovie && (
-        <MovieModal
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-          onAdd={() => handleAddPoster(selectedMovie.title)}
-          onRemove={() => handleRemovePoster(selectedMovie.title)}
-          isSelected={selectedPosters.includes(selectedMovie.title)}
-          canAdd={selectedPosters.length < 3}
-          handleAddToWatchlist={handleAddToWatchlist}
-          handleRemoveFromWatchlist={handleRemoveFromWatchlist}
-          watchlistTitles={watchlistTitles}
-        />
-      )}
-
+      {/* Site footer */}
       <Footer />
     </div>
   );
