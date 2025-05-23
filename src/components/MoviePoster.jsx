@@ -38,7 +38,7 @@ const MoviePoster = ({
 
   return (
     <div
-      className="relative aspect-[2/3] rounded overflow-hidden shadow-inner cursor-pointer transform transition-transform duration-200 hover:scale-105 group hover:border-2 hover:border-white"
+      className="relative aspect-[2/3] rounded overflow-hidden shadow-inner cursor-pointer transform transition-transform duration-200 hover:scale-105 group"
       onClick={() => setSelectedMovie({ title, poster })}
     >
       {/* Movie poster */}
@@ -48,30 +48,29 @@ const MoviePoster = ({
         className="w-full h-full object-cover rounded"
       />
 
-      {/* Selection button (top-right) */}
-      <div className="absolute top-2 right-2 z-10">
+      {/* Selection button (top-right, icon only, hover reveal) */}
+      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={toggleSelection}
-          className={`p-1 rounded text-white shadow-md text-xl transition-colors ${
-            isSelected
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-[#00e054] hover:bg-green-600"
-          }`}
-          aria-label={isSelected ? "Remove from selection" : "Add to selection"}
+          className="p-1 rounded-full bg-black/70 hover:bg-black text-white"
         >
-          {isSelected ? <FiMinusSquare /> : <FiPlusSquare />}
+          {isSelected ? (
+            <FiMinusSquare size={20} />
+          ) : (
+            <FiPlusSquare size={20} />
+          )}
         </button>
       </div>
 
-      {/* Watchlist button (bottom full-width overlay) */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      {/* Watchlist button (bottom overlay, full-width, hover reveal) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={toggleWatchlist}
-          className={`
-            w-full py-2 text-sm font-semibold text-white transition-colors duration-200
-            bg-black/60
-            ${isInWatchlist ? "hover:bg-red-600" : "hover:bg-green-600"}
-          `}
+          className={`w-full py-2 text-sm font-semibold text-white transition-colors duration-200 ${
+            isInWatchlist
+              ? "bg-black/60 hover:bg-red-600"
+              : "bg-black/60 hover:bg-green-600"
+          }`}
         >
           {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
         </button>
