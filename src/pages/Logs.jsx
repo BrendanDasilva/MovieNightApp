@@ -45,7 +45,7 @@ const Logs = ({ isDrawerOpen }) => {
   if (error) {
     return (
       <PageWrapper isDrawerOpen={isDrawerOpen}>
-        <div className="p-8 text-red-500 text-center">
+        <div className="p-10 text-red-500 text-center">
           Error loading logs: {error}
         </div>
       </PageWrapper>
@@ -56,7 +56,7 @@ const Logs = ({ isDrawerOpen }) => {
     <div className="min-h-screen flex flex-col">
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Page title */}
-        <h1 className="text-2xl font-bold mb-8 p-4 text-white text-center bg-[#202830] rounded shadow">
+        <h1 className="text-2xl font-bold mb-10 p-10 text-white text-center bg-[#202830] rounded shadow">
           Movie Selection History
         </h1>
 
@@ -69,7 +69,7 @@ const Logs = ({ isDrawerOpen }) => {
           logs.map((log, idx) => (
             <div
               key={idx}
-              className="mb-8 p-4 bg-[#202830] text-white rounded shadow"
+              className="mb-10 p-10 bg-[#202830] text-white rounded shadow"
             >
               {/* Human-readable log date */}
               <h3 className="text-lg font-semibold mb-4">

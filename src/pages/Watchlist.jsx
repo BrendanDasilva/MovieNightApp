@@ -216,10 +216,10 @@ const Watchlist = ({
     <div className="min-h-screen flex flex-col">
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Outer content container */}
-        <div className="w-full max-w-5xl mx-auto mb-8 px-4 py-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full mx-auto mb-10 bg-[#202830] text-white rounded shadow">
           {/* Page heading and search input */}
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold mb-4">Your Movie Watchlist</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold mb-4">Your Watchlist</h2>
             <SearchBox
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -239,7 +239,7 @@ const Watchlist = ({
 
           {/* Results summary */}
           {filteredMovies.length > 0 && (
-            <h3 className="mb-6 text-lg font-medium text-center">
+            <h3 className=" text-lg font-medium text-center">
               {filteredMovies.length} movies found
             </h3>
           )}
@@ -249,7 +249,7 @@ const Watchlist = ({
 
           {/* Poster grid */}
           {!isLoading && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-10 mb-10">
               {visibleMovies.map((movie, idx) => (
                 <MoviePoster
                   key={idx}

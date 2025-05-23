@@ -67,9 +67,9 @@ const Browse = ({
       {/* Main content container with layout margin */}
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Search form section */}
-        <div className="w-full max-w-5xl mx-auto px-4 py-10 bg-[#202830] text-white rounded shadow mb-12">
+        <div className="w-full mx-auto p-10 bg-[#202830] text-white rounded shadow mb-10">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold mt-4">Browse Movies</h1>
+            <h1 className="text-4xl font-bold">Browse Movies</h1>
             <div className="max-w-3xl text-black mx-auto">
               <SearchBox
                 searchQuery={searchQuery}
@@ -82,8 +82,8 @@ const Browse = ({
 
         {/* Display results grid if available */}
         {results.length > 0 && (
-          <div className="mt-8 bg-[#202830] rounded-lg shadow">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
+          <div className="bg-[#202830] rounded-lg shadow">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-10 mb-10">
               {results.map((movie, idx) => (
                 <MoviePoster
                   key={idx}
