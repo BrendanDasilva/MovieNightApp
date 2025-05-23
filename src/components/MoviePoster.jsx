@@ -1,4 +1,5 @@
 import React from "react";
+import { FiPlusSquare, FiMinusSquare } from "react-icons/fi";
 
 const MoviePoster = ({
   movie,
@@ -37,43 +38,40 @@ const MoviePoster = ({
 
   return (
     <div
-      className="relative aspect-[2/3] rounded overflow-hidden shadow-inner cursor-pointer transform transition-transform duration-200 hover:scale-105"
+      className="relative aspect-[2/3] rounded overflow-hidden shadow-inner cursor-pointer transform transition-transform duration-200 hover:scale-105 group hover:border-2 hover:border-white"
       onClick={() => setSelectedMovie({ title, poster })}
     >
+      {/* Movie poster */}
       <img
         src={poster || "/placeholder-poster.jpg"}
         alt={title}
         className="w-full h-full object-cover rounded"
       />
 
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
-        <h3 className="text-white font-medium text-sm truncate px-2">
-          {title}
-        </h3>
-      </div>
-
-      {/* Buttons (Selection + Watchlist) */}
-      <div className="absolute top-2 right-2 flex flex-col items-end gap-2 z-10">
-        {/* Selection Button */}
+      {/* Selection button (top-right) */}
+      <div className="absolute top-2 right-2 z-10">
         <button
           onClick={toggleSelection}
-          className={`px-2 py-1 text-xs rounded font-semibold ${
+          className={`p-1 rounded text-white shadow-md text-xl transition-colors ${
             isSelected
               ? "bg-red-500 hover:bg-red-600"
-              : "bg-purple-500 hover:bg-purple-600"
-          } text-white shadow`}
+              : "bg-[#00e054] hover:bg-green-600"
+          }`}
+          aria-label={isSelected ? "Remove from selection" : "Add to selection"}
         >
-          {isSelected ? "Remove" : "Add"}
+          {isSelected ? <FiMinusSquare /> : <FiPlusSquare />}
         </button>
+      </div>
 
-        {/* Watchlist Button */}
+      {/* Watchlist button (bottom full-width overlay) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
         <button
           onClick={toggleWatchlist}
-          className={`px-2 py-1 text-xs rounded font-semibold ${
-            isInWatchlist
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-yellow-500 hover:bg-yellow-600"
-          } text-white shadow`}
+          className={`
+            w-full py-2 text-sm font-semibold text-white transition-colors duration-200
+            bg-black/60
+            ${isInWatchlist ? "hover:bg-red-600" : "hover:bg-green-600"}
+          `}
         >
           {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
         </button>
