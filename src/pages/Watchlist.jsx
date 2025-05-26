@@ -219,7 +219,7 @@ const Watchlist = ({
         <div className="w-full mx-auto mb-10 bg-[#202830] text-white rounded shadow">
           {/* Page heading and search input */}
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-4">Your Watchlist</h2>
+            <h2 className="text-2xl font-bold pt-10 mb-4">Your Watchlist</h2>
             <SearchBox
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}

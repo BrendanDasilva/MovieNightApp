@@ -48,7 +48,7 @@ const MoviePoster = ({
         className="w-full h-full object-cover rounded"
       />
 
-      {/* Selection button (top-right, icon only, hover reveal) */}
+      {/* Selection icon button */}
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={toggleSelection}
@@ -62,15 +62,20 @@ const MoviePoster = ({
         </button>
       </div>
 
-      {/* Watchlist button (bottom overlay, full-width, hover reveal) */}
+      {/* Watchlist button with animated hover effect */}
       <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={toggleWatchlist}
-          className={`w-full py-2 text-sm font-semibold text-white transition-colors duration-200 ${
-            isInWatchlist
-              ? "bg-black/60 hover:bg-red-600"
-              : "bg-black/60 hover:bg-green-600"
-          }`}
+          className={`
+            w-full relative py-2 text-sm font-semibold text-white overflow-hidden 
+            before:absolute before:top-0 before:-left-full before:w-full before:h-full before:transition-all before:duration-500 before:ease-in-out
+            before:z-[-1]
+            ${
+              isInWatchlist
+                ? " before:bg-gradient-to-r before:from-red-500 before:to-red-700 hover:before:left-0"
+                : " before:bg-gradient-to-r before:from-green-500 before:to-green-700 hover:before:left-0"
+            }
+          `}
         >
           {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
         </button>
