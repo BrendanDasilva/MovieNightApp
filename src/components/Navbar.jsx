@@ -64,7 +64,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
         </div>
 
         {/* Hamburger / Close icon - stays above mobile menu */}
-        <div className="md:hidden z-50 relative">
+        <div className="md:hidden z-50 relative mx-10">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-white text-2xl focus:outline-none transition-transform duration-300"
@@ -80,7 +80,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
 
       {/* Full-screen mobile menu */}
       <div
-        className={`fixed inset-0 bg-[#14181c] z-40 flex flex-col justify-center items-center space-y-8 text-xl font-semibold transition-all duration-500 ${
+        className={`fixed inset-0 bg-[#14181c] z-40 flex flex-col justify-center items-center space-y-4 text-xl font-semibold uppercase tracking-wider transition-all duration-500 ${
           menuOpen
             ? "animate-slideDown pointer-events-auto"
             : "animate-slideUp pointer-events-none"
@@ -89,28 +89,28 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
         <Link
           to="/"
           onClick={() => setMenuOpen(false)}
-          className="text-white hover:underline"
+          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
         >
           Home
         </Link>
         <Link
           to="/browse"
           onClick={() => setMenuOpen(false)}
-          className="text-white hover:underline"
+          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
         >
           Browse
         </Link>
         <Link
           to="/watchlist"
           onClick={() => setMenuOpen(false)}
-          className="text-white hover:underline"
+          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
         >
           Watchlist
         </Link>
         <Link
           to="/logs"
           onClick={() => setMenuOpen(false)}
-          className="text-white hover:underline"
+          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
         >
           Logs
         </Link>
@@ -119,7 +119,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
             handleLogout();
             setMenuOpen(false);
           }}
-          className="text-white hover:underline"
+          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline uppercase transition-colors"
         >
           Logout
         </button>
