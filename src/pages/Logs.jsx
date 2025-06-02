@@ -1,34 +1,12 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import LoadingDots from "../components/LoadingDots";
 import PageWrapper from "../components/PageWrapper";
 import Footer from "../components/Footer";
+import useFetchLogs from "../components/hooks/useFetchLogs";
 
 // Logs page: displays history of previously submitted movie selections
 const Logs = ({ isDrawerOpen }) => {
-  const [logs, setLogs] = useState([]); // array of selection history entries
-  const [loading, setLoading] = useState(true); // loading state while fetching logs
-  const [error, setError] = useState(null); // error state for failed API request
-
-  // Fetch logs from backend on component mount
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const res = await axios.get("/api/logs", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setLogs(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        setError(err.response?.data?.error || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLogs();
-  }, []);
+  const { logs, loading, error } = useFetchLogs();
 
   // Show loading spinner while fetching logs
   if (loading) {

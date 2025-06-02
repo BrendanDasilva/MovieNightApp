@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import SearchBox from "../components/SearchBox";
 import LoadingDots from "../components/LoadingDots";
 import Footer from "../components/Footer";
 import MoviePoster from "../components/MoviePoster";
 import PageWrapper from "../components/PageWrapper";
+import useTmdbSearch from "../components/hooks/useTmdbSearch";
 
 // Browse page: allows user to search TMDB movies and add/remove them from their watchlist
 const Browse = ({
@@ -21,32 +21,13 @@ const Browse = ({
 }) => {
   // Search and result state
   const [searchQuery, setSearchQuery] = useState(""); // user input
-  const [results, setResults] = useState([]); // search result list
-  const [loading, setLoading] = useState(false); // loading indicator
 
   // Toast alerts for watchlist changes
   const [watchlistAlert, setWatchlistAlert] = useState(false);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
 
-  // Fetch search results from TMDB when query changes (debounced)
-  useEffect(() => {
-    const searchMovies = async () => {
-      if (searchQuery.length < 3) return;
-      setLoading(true);
-      try {
-        const res = await axios.get(
-          `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}`
-        );
-        setResults(res.data);
-      } catch (err) {
-        console.error("Search error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const debounceTimer = setTimeout(searchMovies, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+  // Use TMDB search hook
+  const { results, loading } = useTmdbSearch(searchQuery);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -93,6 +74,7 @@ const Browse = ({
                   handleAddPoster={handleAddPoster}
                   handleRemovePoster={handleRemovePoster}
                   setSelectedMovie={setSelectedMovie}
+                  selectedMovie={selectedMovie}
                   watchlistTitles={watchlistTitles}
                   handleAddToWatchlist={async (m) => {
                     await handleAddToWatchlist(m);
