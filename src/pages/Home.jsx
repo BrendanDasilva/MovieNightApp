@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import LoadingDots from "../components/LoadingDots";
 import LatestNews from "../components/LatestNews";
 import Footer from "../components/Footer";
 import MoviePoster from "../components/MoviePoster";
 import PageWrapper from "../components/PageWrapper";
+import useLatestHomeData from "../components/hooks/useLatestHomeData";
+import useGenreMovies from "../components/hooks/useGenreMovies";
 
 // Home page: shows last selection log, trending films, spotlight genre, and news
 const Home = ({
@@ -19,79 +20,22 @@ const Home = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
-  // App-wide data
-  const [latestLog, setLatestLog] = useState(null); // user's last selection
-  const [trendingMovies, setTrendingMovies] = useState([]); // trending TMDB titles
-  const [genreMovies, setGenreMovies] = useState([]); // genre-based selection
-  const [genres, setGenres] = useState([]); // list of genres from TMDB
+  // Genre selector state
   const [selectedGenre, setSelectedGenre] = useState({
     id: 28,
     name: "Action",
   });
 
-  // Loading and error state trackers
-  const [loading, setLoading] = useState({
-    history: true,
-    trending: true,
-    genre: true,
-    news: true,
-    genres: true,
-  });
-  const [errors, setErrors] = useState({});
+  // Fetch home data from custom hook
+  const { latestLog, trendingMovies, genres, news, loading, errors } =
+    useLatestHomeData();
 
-  // News feed
-  const [news, setNews] = useState([]);
-
-  // Fetch logs, trending, genres, and news when page mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [logRes, trendingRes, genresRes, newsRes] = await Promise.all([
-          axios.get("/api/logs/latest", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }),
-          axios.get("/api/tmdb/trending"),
-          axios.get("/api/tmdb/genres"),
-          axios.get("/api/news"),
-        ]);
-        setLatestLog(logRes.data);
-        setTrendingMovies(trendingRes.data);
-        setGenres(genresRes.data);
-        setNews(newsRes.data);
-      } catch (err) {
-        setErrors((prev) => ({ ...prev, general: err.message }));
-      } finally {
-        setLoading((prev) => ({
-          ...prev,
-          history: false,
-          trending: false,
-          genres: false,
-          news: false,
-        }));
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Fetch genre-specific movies when user changes genre dropdown
-  useEffect(() => {
-    const fetchGenreMovies = async () => {
-      setLoading((prev) => ({ ...prev, genre: true }));
-      try {
-        const res = await axios.get(`/api/tmdb/genre/${selectedGenre.id}`);
-        setGenreMovies(res.data);
-      } catch (err) {
-        setErrors((prev) => ({ ...prev, genre: err.message }));
-      } finally {
-        setLoading((prev) => ({ ...prev, genre: false }));
-      }
-    };
-
-    if (selectedGenre?.id) fetchGenreMovies();
-  }, [selectedGenre]);
+  // Fetch genre-specific movies
+  const {
+    genreMovies,
+    loading: genreLoading,
+    error: genreError,
+  } = useGenreMovies(selectedGenre);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -124,6 +68,7 @@ const Home = ({
             try!
           </p>
         </div>
+
         {/* ---- Last Movie Night Selection ---- */}
         <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
           <h3 className="text-center text-white text-2xl mb-10">
@@ -166,15 +111,24 @@ const Home = ({
             </div>
           ) : (
             // Placeholder if no past logs exist
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-full aspect-[2/3] bg-gray-200 rounded-lg shadow-inner flex items-center justify-center text-gray-500 text-lg"
-                >
-                  Poster {i} (placeholder)
-                </div>
-              ))}
+            <div className="relative">
+              {/* Overlay message */}
+              <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center text-center px-4 rounded-lg">
+                <p className="text-white text-lg font-medium max-w-[90%]">
+                  No movie night history yet. Head to the Watchlist or Browse to
+                  get started!
+                </p>
+              </div>
+
+              {/* Placeholder poster grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-full aspect-[2/3] bg-gray-200 rounded-lg shadow-inner"
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -238,7 +192,7 @@ const Home = ({
             </select>
           </div>
 
-          {loading.genre ? (
+          {genreLoading ? (
             <LoadingDots />
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
