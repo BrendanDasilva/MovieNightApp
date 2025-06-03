@@ -116,11 +116,6 @@ const App = () => {
   // Remove a poster from selection
   const handleRemovePoster = (title) => {
     setSelectedPosters((prev) => prev.filter((t) => t !== title));
-    setPosterMap((prev) => {
-      const copy = { ...prev };
-      delete copy[title];
-      return copy;
-    });
   };
 
   // Submit final selection to the backend
