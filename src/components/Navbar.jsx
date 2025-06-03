@@ -1,15 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = ({ onLogout, isDrawerOpen }) => {
   const navigate = useNavigate();
+
+  // Track if hamburger menu is toggled
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Control whether menu is visible (so we can run animation before unmounting)
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  // Handle logout and redirect to login
   const handleLogout = () => {
     onLogout();
     navigate("/login");
   };
+
+  // Control menu visibility to allow animation on close
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuVisible(true); // show immediately on open
+    } else {
+      // delay hide until after slide-up animation completes
+      const timer = setTimeout(() => setMenuVisible(false), 500); // match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [menuOpen]);
 
   return (
     <nav className="w-full bg-[#14181c] text-white py-4 shadow-md fixed top-0 left-0 z-50">
@@ -63,7 +80,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
           </button>
         </div>
 
-        {/* Hamburger / Close icon - stays above mobile menu */}
+        {/* Hamburger / Close icon - shown on mobile */}
         <div className="md:hidden z-50 relative mx-10">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -78,52 +95,54 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
         </div>
       </div>
 
-      {/* Full-screen mobile menu */}
-      <div
-        className={`fixed inset-0 bg-[#14181c] z-40 flex flex-col justify-center items-center space-y-4 text-xl font-semibold uppercase tracking-wider transition-all duration-500 ${
-          menuOpen
-            ? "animate-slideDown pointer-events-auto"
-            : "animate-slideUp pointer-events-none"
-        }`}
-      >
-        <Link
-          to="/"
-          onClick={() => setMenuOpen(false)}
-          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+      {/* Full-screen mobile menu with open/close animations */}
+      {menuVisible && (
+        <div
+          className={`fixed inset-0 bg-[#14181c] z-40 flex flex-col justify-center items-center space-y-4 text-xl font-semibold uppercase tracking-wider transition-all duration-500 ${
+            menuOpen
+              ? "animate-slideDown pointer-events-auto"
+              : "animate-slideUp pointer-events-none"
+          }`}
         >
-          Home
-        </Link>
-        <Link
-          to="/browse"
-          onClick={() => setMenuOpen(false)}
-          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
-        >
-          Browse
-        </Link>
-        <Link
-          to="/watchlist"
-          onClick={() => setMenuOpen(false)}
-          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
-        >
-          Watchlist
-        </Link>
-        <Link
-          to="/logs"
-          onClick={() => setMenuOpen(false)}
-          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
-        >
-          Logs
-        </Link>
-        <button
-          onClick={() => {
-            handleLogout();
-            setMenuOpen(false);
-          }}
-          className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline uppercase transition-colors"
-        >
-          Logout
-        </button>
-      </div>
+          <Link
+            to="/"
+            onClick={() => setMenuOpen(false)}
+            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+          >
+            Home
+          </Link>
+          <Link
+            to="/browse"
+            onClick={() => setMenuOpen(false)}
+            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+          >
+            Browse
+          </Link>
+          <Link
+            to="/watchlist"
+            onClick={() => setMenuOpen(false)}
+            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+          >
+            Watchlist
+          </Link>
+          <Link
+            to="/logs"
+            onClick={() => setMenuOpen(false)}
+            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+          >
+            Logs
+          </Link>
+          <button
+            onClick={() => {
+              handleLogout();
+              setMenuOpen(false);
+            }}
+            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline uppercase transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      )}
     </nav>
   );
 };

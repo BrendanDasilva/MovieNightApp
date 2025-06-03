@@ -1,19 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import LoadingDots from "../components/LoadingDots";
 import SearchBox from "../components/SearchBox";
 import MoviePoster from "../components/MoviePoster";
 import WatchlistFilters from "../components/WatchlistFilters";
 import PageWrapper from "../components/PageWrapper";
 import Footer from "../components/Footer";
+import ResultsSummary from "../components/ResultsSummary";
 import useWatchlistData from "../components/hooks/useWatchlistData";
 import useFilteredMovies from "../components/hooks/useFilteredMovies";
+import useGenres from "../components/hooks/useGenres";
 
 // Number of movies to load at a time for infinite scroll
 const CHUNK_SIZE = 20;
 
 // Watchlist page: shows saved movies, allows filtering/sorting/searching
 const Watchlist = ({
-  // Movie and UI state
   selectedPosters,
   setSelectedPosters,
   posterMap,
@@ -25,12 +26,16 @@ const Watchlist = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
-  const [searchQuery, setSearchQuery] = useState(""); // search input
-  const [selectedDecade, setSelectedDecade] = useState("All"); // decade filter
-  const [selectedGenre, setSelectedGenre] = useState("All"); // genre filter
-  const [sortBy, setSortBy] = useState("createdDesc"); // sorting criteria
-  const [genres, setGenres] = useState([]); // available genres
+  // UI and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDecade, setSelectedDecade] = useState("All");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [sortBy, setSortBy] = useState("createdDesc");
 
+  // Genre options
+  const genres = useGenres();
+
+  // Movie data + poster loading logic
   const {
     allMovies,
     setAllMovies,
@@ -38,11 +43,11 @@ const Watchlist = ({
     setVisibleMovies,
     isLoading,
     isAppending,
-    posterErrors,
     loadMoreRef,
     loadMore,
   } = useWatchlistData(setPosterMap, selectedPosters);
 
+  // Filtered + sorted movies
   const filteredMovies = useFilteredMovies(
     allMovies,
     searchQuery,
@@ -51,27 +56,12 @@ const Watchlist = ({
     sortBy
   );
 
-  // Fetch available genres on mount
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const res = await fetch("/api/tmdb/genres");
-        const data = await res.json();
-        const genreNames = data.map((g) => g.name);
-        setGenres(genreNames);
-      } catch (err) {
-        console.error("Failed to fetch genres", err);
-      }
-    };
-    fetchGenres();
-  }, []);
-
-  // Reset chunked list when filters change
+  // Reset visible chunked list when filters/search change
   useEffect(() => {
     setVisibleMovies(filteredMovies.slice(0, CHUNK_SIZE));
   }, [filteredMovies]);
 
-  // Infinite scroll observer
+  // Infinite scroll trigger
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (
@@ -89,9 +79,9 @@ const Watchlist = ({
   return (
     <div className="min-h-screen flex flex-col">
       <PageWrapper isDrawerOpen={isDrawerOpen}>
-        {/* Outer content container */}
+        {/* Outer container */}
         <div className="w-full mx-auto mb-10 bg-[#202830] text-white rounded shadow">
-          {/* Page heading and search input */}
+          {/* Header + search bar */}
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold pt-10 mb-4">Your Watchlist</h2>
             <SearchBox
@@ -100,7 +90,7 @@ const Watchlist = ({
             />
           </div>
 
-          {/* Filter and sort controls */}
+          {/* Filter/sort controls */}
           <WatchlistFilters
             selectedGenre={selectedGenre}
             setSelectedGenre={setSelectedGenre}
@@ -111,17 +101,15 @@ const Watchlist = ({
             genres={genres}
           />
 
-          {/* Results summary */}
+          {/* Filtered results count */}
           {filteredMovies.length > 0 && (
-            <h3 className="text-lg font-medium text-center">
-              {filteredMovies.length} movies found
-            </h3>
+            <ResultsSummary count={filteredMovies.length} />
           )}
 
-          {/* Loading state */}
+          {/* Loading spinner */}
           {isLoading && <LoadingDots />}
 
-          {/* Poster grid */}
+          {/* Movie grid */}
           {!isLoading && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-10 mb-10">
               {visibleMovies.map((movie, idx) => (
@@ -146,7 +134,7 @@ const Watchlist = ({
             </div>
           )}
 
-          {/* Appending spinner */}
+          {/* Infinite scroll loading spinner */}
           {!isLoading && isAppending && <LoadingDots />}
           <div ref={loadMoreRef} className="h-10 mt-10" />
         </div>
