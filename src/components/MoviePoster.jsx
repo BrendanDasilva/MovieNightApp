@@ -51,11 +51,17 @@ const MoviePoster = ({
       onClick={() => setSelectedMovie({ title, poster })}
     >
       {/* Movie poster image */}
-      <img
-        src={poster || "/placeholder-poster.jpg"}
-        alt={title}
-        className="w-full h-full object-cover rounded"
-      />
+      {poster ? (
+        <img
+          src={poster}
+          alt={title}
+          className="w-full h-full object-cover rounded"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-black text-white text-center p-4 text-sm rounded">
+          {title || "No Poster"}
+        </div>
+      )}
 
       {/* Top-right action button (either Add/Remove or Remove only in selection mode) */}
       <div className="absolute top-1.5 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

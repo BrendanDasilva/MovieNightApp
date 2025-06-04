@@ -228,7 +228,7 @@ const App = () => {
                   setSelectedMovie={setSelectedMovie}
                   handleRemovePoster={handleRemovePoster}
                   handleAddPoster={handleAddPoster}
-                  allWatchlistTitles={posterMap ? Object.keys(posterMap) : []}
+                  allWatchlistTitles={watchlistTitles}
                   handleConfirmSelection={handleConfirmSelection}
                   isDrawerOpen={isDrawerOpen}
                   setIsDrawerOpen={setIsDrawerOpen}
