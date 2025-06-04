@@ -118,7 +118,7 @@ const App = () => {
     setSelectedPosters((prev) => prev.filter((t) => t !== title));
   };
 
-  // Submit final selection to the backend
+  // Submit final selection to the backend (still used for the “successAlert”)
   const handleConfirmSelection = async (selectedTitle) => {
     try {
       const moviesToSave = selectedPosters.map((title) => ({
@@ -229,7 +229,9 @@ const App = () => {
                   handleRemovePoster={handleRemovePoster}
                   handleAddPoster={handleAddPoster}
                   allWatchlistTitles={watchlistTitles}
-                  handleConfirmSelection={handleConfirmSelection}
+                  // Pass these two so SelectedMovies can clear the parent state:
+                  setSelectedPosters={setSelectedPosters}
+                  setPosterMap={setPosterMap}
                   isDrawerOpen={isDrawerOpen}
                   setIsDrawerOpen={setIsDrawerOpen}
                 />

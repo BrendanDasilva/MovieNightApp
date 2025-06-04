@@ -24,6 +24,11 @@ const Browse = ({
   const [searchQuery, setSearchQuery] = useState(""); // user input
   const { results, loading } = useTmdbSearch(searchQuery);
 
+  // Deduplicate by TMDB ID so we don’t render the same movie multiple times
+  const uniqueResults = results.filter(
+    (movie, idx, arr) => arr.findIndex((m) => m.id === movie.id) === idx
+  );
+
   // Toast alerts for watchlist changes
   const [watchlistAlert, setWatchlistAlert] = useState(false);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
@@ -71,7 +76,7 @@ const Browse = ({
 
           {!loading && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
-              {results.map((movie, idx) => (
+              {uniqueResults.map((movie, idx) => (
                 <MoviePoster
                   key={idx}
                   movie={movie}

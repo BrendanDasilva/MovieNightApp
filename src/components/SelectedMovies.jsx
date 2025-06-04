@@ -1,8 +1,6 @@
-// SelectedMovies.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { IoMdRemove } from "react-icons/io";
 import MoviePoster from "./MoviePoster";
 
 const PANEL_WIDTH_PX = 420;
@@ -22,8 +20,6 @@ const SelectedMovies = ({
 }) => {
   const [showConfirm, setShowConfirm] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  const titles = selectedPosters.filter((t) => t);
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
@@ -54,8 +50,9 @@ const SelectedMovies = ({
       await axios.post("http://localhost:3001/api/logs", { movies });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
+
+      // Only clear the selected slots. Do NOT clear posterMap entirely.
       setSelectedPosters([]);
-      setPosterMap({});
     } catch (err) {
       console.error("Failed to submit selection", err);
     }
