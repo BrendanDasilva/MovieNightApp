@@ -6,6 +6,7 @@ import MoviePoster from "../components/MoviePoster";
 import PageWrapper from "../components/PageWrapper";
 import useLatestHomeData from "../components/hooks/useLatestHomeData";
 import useGenreMovies from "../components/hooks/useGenreMovies";
+import Toast from "../components/Toast";
 
 // Home page: shows last selection log, trending films, spotlight genre, and news
 const Home = ({
@@ -37,8 +38,38 @@ const Home = ({
     error: genreError,
   } = useGenreMovies(selectedGenre);
 
+  // Toast alert state for adding/removing from watchlist
+  const [watchlistAlert, setWatchlistAlert] = useState(false);
+  const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
+
+  // Wrapper to add + show toast
+  const onAddToWatchlist = async (movie) => {
+    await handleAddToWatchlist(movie);
+    setWatchlistAlert(true);
+    setTimeout(() => setWatchlistAlert(false), 3000);
+  };
+
+  // Wrapper to remove + show toast
+  const onRemoveFromWatchlist = async (movie) => {
+    await handleRemoveFromWatchlist(movie);
+    setWatchlistRemoveAlert(true);
+    setTimeout(() => setWatchlistRemoveAlert(false), 3000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Toasts */}
+      <Toast
+        visible={watchlistAlert}
+        message="Movie added to watchlist"
+        type="success"
+      />
+      <Toast
+        visible={watchlistRemoveAlert}
+        message="Movie removed from watchlist"
+        type="error"
+      />
+
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* ---- Header Section ---- */}
         <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
@@ -158,8 +189,8 @@ const Home = ({
                   handleAddPoster={handleAddPoster}
                   handleRemovePoster={handleRemovePoster}
                   watchlistTitles={watchlistTitles}
-                  handleAddToWatchlist={handleAddToWatchlist}
-                  handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                  handleAddToWatchlist={() => onAddToWatchlist(movie)}
+                  handleRemoveFromWatchlist={() => onRemoveFromWatchlist(movie)}
                 />
               ))}
             </div>
@@ -212,8 +243,8 @@ const Home = ({
                   handleAddPoster={handleAddPoster}
                   handleRemovePoster={handleRemovePoster}
                   watchlistTitles={watchlistTitles}
-                  handleAddToWatchlist={handleAddToWatchlist}
-                  handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                  handleAddToWatchlist={() => onAddToWatchlist(movie)}
+                  handleRemoveFromWatchlist={() => onRemoveFromWatchlist(movie)}
                 />
               ))}
             </div>

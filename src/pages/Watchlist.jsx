@@ -9,6 +9,7 @@ import ResultsSummary from "../components/ResultsSummary";
 import useWatchlistData from "../components/hooks/useWatchlistData";
 import useFilteredMovies from "../components/hooks/useFilteredMovies";
 import useGenres from "../components/hooks/useGenres";
+import Toast from "../components/Toast";
 
 // Number of movies to load at a time for infinite scroll
 const CHUNK_SIZE = 20;
@@ -34,6 +35,24 @@ const Watchlist = ({
 
   // Genre options
   const genres = useGenres();
+
+  // Toast alerts for watchlist changes
+  const [watchlistAlert, setWatchlistAlert] = useState(false);
+  const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
+
+  // Wrapper to add + show toast
+  const onAddToWatchlist = async (movie) => {
+    await handleAddToWatchlist(movie);
+    setWatchlistAlert(true);
+    setTimeout(() => setWatchlistAlert(false), 3000);
+  };
+
+  // Wrapper to remove + show toast
+  const onRemoveFromWatchlist = async (movie) => {
+    await handleRemoveFromWatchlist(movie);
+    setWatchlistRemoveAlert(true);
+    setTimeout(() => setWatchlistRemoveAlert(false), 3000);
+  };
 
   // Movie data + poster loading logic
   const {
@@ -78,6 +97,18 @@ const Watchlist = ({
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Toasts */}
+      <Toast
+        visible={watchlistAlert}
+        message="Movie added to watchlist"
+        type="success"
+      />
+      <Toast
+        visible={watchlistRemoveAlert}
+        message="Movie removed from watchlist"
+        type="error"
+      />
+
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Outer container */}
         <div className="w-full mx-auto mb-10 bg-[#202830] text-white rounded shadow">
@@ -122,9 +153,9 @@ const Watchlist = ({
                   handleAddPoster={handleAddPoster}
                   handleRemovePoster={handleRemovePoster}
                   watchlistTitles={allMovies.map((m) => m.title)}
-                  handleAddToWatchlist={() => handleAddToWatchlist(movie)}
+                  handleAddToWatchlist={() => onAddToWatchlist(movie)}
                   handleRemoveFromWatchlist={async () => {
-                    await handleRemoveFromWatchlist(movie);
+                    await onRemoveFromWatchlist(movie);
                     setAllMovies((prev) =>
                       prev.filter((m) => m.title !== movie.title)
                     );
