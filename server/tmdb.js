@@ -9,13 +9,58 @@ const tmdbKey = process.env.TMDB_API_KEY;
 
 // GET /tmdb — fetch movie details by title (and optional year)
 router.get("/", async (req, res) => {
+  const movieIdParam = req.query.id;
+
+  // If `id` is present, fetch directly by TMDB ID
+  if (movieIdParam) {
+    try {
+      const movieUrl = `https://api.themoviedb.org/3/movie/${movieIdParam}?api_key=${tmdbKey}&append_to_response=credits`;
+      const movieResponse = await axios.get(movieUrl);
+      const data = movieResponse.data;
+
+      return res.json({
+        title: data.title,
+        year: data.release_date?.split("-")[0],
+        release_date: data.release_date,
+        rating: data.vote_average,
+        released: data.release_date
+          ? new Date(data.release_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "Release date not available",
+        tagline: data.tagline,
+        poster: data.poster_path
+          ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+          : null,
+        genre: data.genres.map((g) => g.name).join(", "),
+        director:
+          data.credits.crew.find((p) => p.job === "Director")?.name || "N/A",
+        runtime: `${data.runtime} min`,
+        plot: data.overview,
+        actors: data.credits.cast
+          .slice(0, 6)
+          .map((a) => a.name)
+          .join(", "),
+        language: data.original_language,
+        country: data.production_countries.map((c) => c.name).join(", "),
+      });
+    } catch (err) {
+      console.error("TMDB fetch by ID error:", err.message);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch movie by ID from TMDB" });
+    }
+  }
+
+  // If no `id`, fallback to search by title/year
   const title = req.query.title;
   const year = req.query.year;
 
   if (!title) return res.status(400).json({ error: "Title is required" });
 
   try {
-    // Search for movie by title (and year if provided)
     let searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
       title
     )}&api_key=${tmdbKey}`;
@@ -28,9 +73,8 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Movie not found on TMDB" });
     }
 
-    let matched = results[0]; // Default to the first result
+    let matched = results[0];
 
-    // Try exact match if year is provided
     if (year) {
       const exact = results.find(
         (r) =>
@@ -41,13 +85,10 @@ router.get("/", async (req, res) => {
     }
 
     const movieId = matched.id;
-
-    // Fetch full movie details using TMDB movie ID
     const movieUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${tmdbKey}&append_to_response=credits`;
     const movieResponse = await axios.get(movieUrl);
     const data = movieResponse.data;
 
-    // Return structured movie data
     res.json({
       title: data.title,
       year: data.release_date?.split("-")[0],

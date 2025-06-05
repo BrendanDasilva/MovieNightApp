@@ -23,27 +23,30 @@ const SelectedMovies = ({
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
+  // Pick 3 random titles from the watchlist and add them to the selection
   const handleRandom = () => {
     if (!allWatchlistTitles.length) return;
     const shuffled = [...allWatchlistTitles].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 3);
-    selected.forEach((title) => {
-      if (!selectedPosters.includes(title)) {
-        const poster = posterMap[title] || null;
-        handleAddPoster(title, poster);
+    selected.forEach((movie) => {
+      if (!selectedPosters.some((m) => m.id === movie.id)) {
+        handleAddPoster(movie);
       }
     });
   };
 
+  // Clear all selected posters
   const handleClear = () => {
-    selectedPosters.forEach((title) => handleRemovePoster(title));
+    selectedPosters.forEach((movie) => handleRemovePoster(movie.id));
   };
 
-  const handleConfirmSelection = async (selectedTitle) => {
-    const movies = selectedPosters.map((title) => ({
-      title,
-      poster: posterMap[title],
-      isSelected: title === selectedTitle,
+  // Confirm a selection (highlighting one movie as 'selected')
+  const handleConfirmSelection = async (selectedMovie) => {
+    const movies = selectedPosters.map((m) => ({
+      title: m.title,
+      poster: posterMap[m.id],
+      id: m.id,
+      isSelected: m.id === selectedMovie.id,
     }));
 
     try {
@@ -98,9 +101,8 @@ const SelectedMovies = ({
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
         <div className="space-y-6 flex flex-col items-center w-full">
           {[0, 1, 2].map((slotIdx) => {
-            const title = selectedPosters[slotIdx];
-            const poster = posterMap[title];
-            const movie = { title, poster_path: null }; // Pass dummy poster_path
+            const movie = selectedPosters[slotIdx];
+            const poster = movie ? posterMap[movie.id] : null;
 
             return (
               <div
@@ -110,16 +112,16 @@ const SelectedMovies = ({
                 <span className="text-sm text-white font-semibold uppercase tracking-wider">
                   Pick {slotIdx + 1}
                 </span>
-                {title && poster ? (
+                {movie && poster ? (
                   <div className="w-36 h-[13.5rem]">
                     <MoviePoster
-                      movie={{ title }}
+                      movie={movie}
                       posterUrl={poster}
                       selectedPosters={selectedPosters}
                       posterMap={posterMap}
                       setSelectedMovie={setSelectedMovie}
-                      onRemove={handleRemovePoster}
-                      onSelect={() => setShowConfirm(title)}
+                      onRemove={() => handleRemovePoster(movie.id)}
+                      onSelect={() => setShowConfirm(movie)}
                       mode="selection"
                     />
                   </div>

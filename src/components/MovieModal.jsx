@@ -18,14 +18,17 @@ const MovieModal = ({
 }) => {
   const [details, setDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const cacheKey = useRef(`${movie.title}`);
+  const cacheKey = useRef(``);
 
   // Fetch movie details from TMDB or cache
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoading(true);
-      const cachedData = movieCache[cacheKey.current];
 
+      const cacheKeyStr = movie.id ? `id-${movie.id}` : movie.title;
+      cacheKey.current = cacheKeyStr;
+
+      const cachedData = movieCache[cacheKeyStr];
       if (cachedData && Date.now() - cachedData.timestamp < MOVIE_CACHE_TTL) {
         setDetails(cachedData.data);
         setIsLoading(false);
@@ -33,7 +36,10 @@ const MovieModal = ({
       }
 
       try {
-        const query = `title=${encodeURIComponent(movie.title)}`;
+        const query = movie.id
+          ? `id=${movie.id}`
+          : `title=${encodeURIComponent(movie.title)}`;
+
         const res = await axios.get(`http://localhost:3001/tmdb?${query}`);
 
         const movieData = {
@@ -52,7 +58,7 @@ const MovieModal = ({
           rating: res.data.rating,
         };
 
-        movieCache[cacheKey.current] = {
+        movieCache[cacheKeyStr] = {
           data: movieData,
           timestamp: Date.now(),
         };
@@ -66,7 +72,7 @@ const MovieModal = ({
     };
 
     fetchDetails();
-  }, [movie.title]);
+  }, [movie.id, movie.title]);
 
   // Close modal if clicking outside
   const handleBackgroundClick = (e) => {

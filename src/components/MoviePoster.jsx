@@ -34,7 +34,7 @@ const MoviePoster = ({
   // Toggle selection for global selectedPosters list
   const toggleSelection = (e) => {
     e.stopPropagation();
-    isSelected ? handleRemovePoster?.(title) : handleAddPoster?.(title, poster);
+    isSelected ? handleRemovePoster?.(title) : handleAddPoster?.(movie);
   };
 
   // Toggle watchlist for default mode
@@ -48,7 +48,7 @@ const MoviePoster = ({
   return (
     <div
       className="relative aspect-[2/3] rounded overflow-hidden shadow-inner cursor-pointer transform transition-transform duration-200 hover:scale-105 hover:border-2 hover:border-white group"
-      onClick={() => setSelectedMovie({ title, poster })}
+      onClick={() => setSelectedMovie(movie)}
     >
       {/* Movie poster image */}
       {poster ? (

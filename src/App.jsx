@@ -43,7 +43,7 @@ const App = () => {
   const [token, setToken] = useState(
     () => localStorage.getItem("token") || null
   );
-  const [selectedPosters, setSelectedPosters] = useState([]);
+  const [selectedPosters, setSelectedPosters] = useState([]); // now stores movie objects
   const [posterMap, setPosterMap] = useState({});
   const [selectedMovie, setSelectedMovie] = useState(null);
 
@@ -94,37 +94,41 @@ const App = () => {
   };
 
   // Add a poster to the selection
-  const handleAddPoster = async (title, posterUrl) => {
-    if (selectedPosters.includes(title) || selectedPosters.length >= 3) return;
+  const handleAddPoster = (movie) => {
+    if (
+      selectedPosters.some((m) => m.id === movie.id) ||
+      selectedPosters.length >= 3
+    )
+      return;
 
-    if (!posterUrl && !posterMap[title]) {
-      try {
-        const res = await axios.get(
-          `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
-        );
-        posterUrl = res.data.poster;
-      } catch (err) {
-        console.error("Failed to fetch poster for:", title, err);
-        posterUrl = null;
-      }
-    }
+    const posterUrl =
+      movie.poster ||
+      (movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null);
 
-    setSelectedPosters((prev) => [...prev, title]);
-    setPosterMap((prev) => ({ ...prev, [title]: posterUrl }));
+    setSelectedPosters((prev) => [...prev, movie]);
+    setPosterMap((prev) => ({ ...prev, [movie.id]: posterUrl }));
   };
 
   // Remove a poster from selection
-  const handleRemovePoster = (title) => {
-    setSelectedPosters((prev) => prev.filter((t) => t !== title));
+  const handleRemovePoster = (movieId) => {
+    setSelectedPosters((prev) => prev.filter((m) => m.id !== movieId));
+
+    setPosterMap((prev) => {
+      const copy = { ...prev };
+      delete copy[movieId];
+      return copy;
+    });
   };
 
   // Submit final selection to the backend (still used for the “successAlert”)
-  const handleConfirmSelection = async (selectedTitle) => {
+  const handleConfirmSelection = async (selectedMovie) => {
     try {
-      const moviesToSave = selectedPosters.map((title) => ({
-        title,
-        poster: posterMap[title],
-        isSelected: title === selectedTitle,
+      const moviesToSave = selectedPosters.map((movie) => ({
+        title: movie.title,
+        poster: posterMap[movie.id],
+        isSelected: movie.id === selectedMovie.id,
       }));
 
       await axios.post("/api/logs", { movies: moviesToSave });
@@ -229,7 +233,6 @@ const App = () => {
                   handleRemovePoster={handleRemovePoster}
                   handleAddPoster={handleAddPoster}
                   allWatchlistTitles={watchlistTitles}
-                  // Pass these two so SelectedMovies can clear the parent state:
                   setSelectedPosters={setSelectedPosters}
                   setPosterMap={setPosterMap}
                   isDrawerOpen={isDrawerOpen}
@@ -240,11 +243,11 @@ const App = () => {
                   <MovieModal
                     movie={selectedMovie}
                     onClose={() => setSelectedMovie(null)}
-                    onAdd={() =>
-                      handleAddPoster(selectedMovie.title, selectedMovie.poster)
-                    }
-                    onRemove={() => handleRemovePoster(selectedMovie.title)}
-                    isSelected={selectedPosters.includes(selectedMovie.title)}
+                    onAdd={() => handleAddPoster(selectedMovie)}
+                    onRemove={() => handleRemovePoster(selectedMovie.id)}
+                    isSelected={selectedPosters.some(
+                      (m) => m.id === selectedMovie.id
+                    )}
                     canAdd={selectedPosters.length < 3}
                     handleAddToWatchlist={handleAddToWatchlist}
                     handleRemoveFromWatchlist={handleRemoveFromWatchlist}
