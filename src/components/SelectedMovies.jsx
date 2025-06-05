@@ -121,7 +121,11 @@ const SelectedMovies = ({
                       posterMap={posterMap}
                       setSelectedMovie={setSelectedMovie}
                       onRemove={() => handleRemovePoster(movie.id)}
-                      onSelect={() => setShowConfirm(movie)}
+                      onSelect={
+                        selectedPosters.length === 3
+                          ? () => setShowConfirm(movie)
+                          : undefined
+                      }
                       mode="selection"
                     />
                   </div>

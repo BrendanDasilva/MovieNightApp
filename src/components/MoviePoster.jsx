@@ -20,7 +20,7 @@ const MoviePoster = ({
   const title = movie.title;
 
   // Determine if this movie is selected or in the watchlist
-  const isSelected = selectedPosters.includes(title);
+  const isSelected = selectedPosters.some((m) => m.id === movie.id);
   const isInWatchlist = watchlistTitles.includes(title);
 
   // Get poster path from prop or TMDB
@@ -34,7 +34,7 @@ const MoviePoster = ({
   // Toggle selection for global selectedPosters list
   const toggleSelection = (e) => {
     e.stopPropagation();
-    isSelected ? handleRemovePoster?.(title) : handleAddPoster?.(movie);
+    isSelected ? handleRemovePoster?.(movie.id) : handleAddPoster?.(movie);
   };
 
   // Toggle watchlist for default mode
@@ -128,21 +128,27 @@ const MoviePoster = ({
         </div>
       ) : (
         <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect?.(title);
-            }}
-            className={`
-              w-full py-2 text-sm font-semibold text-white bg-black/60 relative overflow-hidden
-              transition-colors duration-300 hover:bg-transparent
-              before:absolute before:top-0 before:-left-full before:w-full before:h-full
-              before:transition-all before:duration-500 before:ease-in-out before:z-[-1]
-              before:bg-gradient-to-r before:from-green-500 before:to-green-700 hover:before:left-0
-            `}
-          >
-            Make Selection
-          </button>
+          {selectedPosters.length === 3 ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect?.(title);
+              }}
+              className={`
+                w-full py-2 text-sm font-semibold text-white bg-black/60 relative overflow-hidden
+                transition-colors duration-300 hover:bg-transparent
+                before:absolute before:top-0 before:-left-full before:w-full before:h-full
+                before:transition-all before:duration-500 before:ease-in-out before:z-[-1]
+                before:bg-gradient-to-r before:from-green-500 before:to-green-700 hover:before:left-0
+              `}
+            >
+              Make Selection
+            </button>
+          ) : (
+            <div className="w-full py-2 text-sm font-semibold text-white bg-black/50 text-center">
+              Add 3 movies to enable selection
+            </div>
+          )}
         </div>
       )}
     </div>

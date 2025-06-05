@@ -18,7 +18,7 @@ const MovieModal = ({
 }) => {
   const [details, setDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const cacheKey = useRef(``);
+  const cacheKey = useRef("");
 
   // Fetch movie details from TMDB or cache
   useEffect(() => {
@@ -43,6 +43,7 @@ const MovieModal = ({
         const res = await axios.get(`http://localhost:3001/tmdb?${query}`);
 
         const movieData = {
+          id: movie.id,
           title: res.data.title,
           release_date: res.data.release_date,
           released: res.data.released,
@@ -185,7 +186,7 @@ const MovieModal = ({
                 {isSelected ? (
                   <>
                     <button
-                      onClick={() => onRemove(movie.title)}
+                      onClick={() => onRemove(movie)}
                       className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                     >
                       Remove
@@ -196,7 +197,7 @@ const MovieModal = ({
                   </>
                 ) : (
                   <button
-                    onClick={() => onAdd(movie.title)}
+                    onClick={() => onAdd(movie)}
                     disabled={!canAdd}
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
                   >
