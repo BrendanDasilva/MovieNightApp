@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { IoMdAdd, IoMdRemove } from "react-icons/io"; // Add/Remove icons
+import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
 // In-memory cache for TMDB responses (expires after 1 hour)
 const MOVIE_CACHE_TTL = 60 * 60 * 1000;
 const movieCache = {};
 
-// Main modal component
 const MovieModal = ({
   movie,
   onClose,
@@ -17,16 +16,15 @@ const MovieModal = ({
   handleAddToWatchlist,
   handleRemoveFromWatchlist,
   watchlistTitles = [],
-  refreshWatchlist,
+  refreshWatchlist, // <-- Optional, but will call if provided
 }) => {
   const [details, setDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [toast, setToast] = useState({ visible: false, message: "", type: "" });
+
   const cacheKey = useRef("");
 
-  // Normalize title for safe comparison
-  const normalized = (str) => str?.toLowerCase().trim();
-
-  // Fetch full movie metadata (from TMDB or cache)
+  // Fetch movie details
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoading(true);
@@ -79,22 +77,28 @@ const MovieModal = ({
     fetchDetails();
   }, [movie.id, movie.title]);
 
-  // Close modal when clicking outside
+  // Close on background click or ESC
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
-
-  // ESC closes modal
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Check if movie is in the watchlist using normalized comparison
+  // Check if movie is in watchlist
   const isInWatchlist = watchlistTitles.some(
-    (m) => normalized(m?.title) === normalized(details?.title)
+    (m) => m?.id && m.id === details?.id
   );
+
+  // Show toast
+  const showToast = (message, type = "success") => {
+    setToast({ visible: true, message, type });
+    setTimeout(() => {
+      setToast({ visible: false, message: "", type: "" });
+    }, 3000);
+  };
 
   return (
     <div
@@ -110,7 +114,18 @@ const MovieModal = ({
           &times;
         </button>
 
-        {/* Loading / Error / Content */}
+        {/* Toast */}
+        {toast.visible && (
+          <div
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded shadow-lg z-50 text-white ${
+              toast.type === "error" ? "bg-red-600" : "bg-green-600"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
+
+        {/* Content */}
         {isLoading ? (
           <div className="flex flex-col md:flex-row gap-6">
             <div className="w-full md:w-1/3">
@@ -130,7 +145,7 @@ const MovieModal = ({
           <div className="text-red-500 text-center py-10">{details.error}</div>
         ) : (
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Poster with controls */}
+            {/* Poster + controls */}
             <div className="w-full md:w-1/3 relative">
               <img
                 src={details.poster}
@@ -142,7 +157,7 @@ const MovieModal = ({
                 }}
               />
 
-              {/* Selection button top right */}
+              {/* Add/Remove from selection */}
               <div className="absolute top-2 right-2 z-10">
                 <button
                   onClick={(e) => {
@@ -167,17 +182,21 @@ const MovieModal = ({
                 </button>
               </div>
 
-              {/* Watchlist toggle button bottom */}
+              {/* Watchlist button */}
               <div className="absolute bottom-0 left-0 right-0 z-10">
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
                     if (isInWatchlist) {
                       await handleRemoveFromWatchlist(details);
+                      showToast("Movie removed from watchlist", "error");
                     } else {
                       await handleAddToWatchlist(details);
+                      showToast("Movie added to watchlist", "success");
                     }
-                    refreshWatchlist?.(); // refetch updated watchlist state
+
+                    // Re-sync global state
+                    if (refreshWatchlist) await refreshWatchlist();
                   }}
                   className={`w-full relative py-2 text-sm font-semibold text-white bg-black/60 overflow-hidden transition-colors duration-300 hover:bg-transparent before:absolute before:top-0 before:-left-full before:w-full before:h-full before:transition-all before:duration-500 before:ease-in-out before:z-[-1] hover:before:left-0 ${
                     isInWatchlist
@@ -190,19 +209,17 @@ const MovieModal = ({
               </div>
             </div>
 
-            {/* Textual movie details */}
+            {/* Textual data */}
             <div className="flex-1">
               <h2 className="text-3xl font-bold mb-2">
                 {details.title}
                 {details.release_date &&
                   ` (${details.release_date.split("-")[0]})`}
               </h2>
-
               {details.tagline && (
                 <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
               )}
 
-              {/* Genre pills */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {details.genre.split(", ").map((g) => (
                   <span
@@ -214,7 +231,6 @@ const MovieModal = ({
                 ))}
               </div>
 
-              {/* Metadata */}
               <div className="text-sm space-y-1">
                 <p>
                   <strong>Released:</strong> {details.released}

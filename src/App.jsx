@@ -253,6 +253,7 @@ const App = () => {
                     handleAddToWatchlist={handleAddToWatchlist}
                     handleRemoveFromWatchlist={handleRemoveFromWatchlist}
                     watchlistTitles={watchlistTitles}
+                    refreshWatchlist={fetchWatchlistTitles}
                   />
                 )}
 
