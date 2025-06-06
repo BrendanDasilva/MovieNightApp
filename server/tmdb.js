@@ -19,6 +19,7 @@ router.get("/", async (req, res) => {
       const data = movieResponse.data;
 
       return res.json({
+        id: data.id,
         title: data.title,
         year: data.release_date?.split("-")[0],
         release_date: data.release_date,
@@ -34,6 +35,7 @@ router.get("/", async (req, res) => {
         poster: data.poster_path
           ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
           : null,
+        poster_path: data.poster_path ?? null,
         genre: data.genres.map((g) => g.name).join(", "),
         director:
           data.credits.crew.find((p) => p.job === "Director")?.name || "N/A",
@@ -74,7 +76,6 @@ router.get("/", async (req, res) => {
     }
 
     let matched = results[0];
-
     if (year) {
       const exact = results.find(
         (r) =>
@@ -90,6 +91,7 @@ router.get("/", async (req, res) => {
     const data = movieResponse.data;
 
     res.json({
+      id: data.id,
       title: data.title,
       year: data.release_date?.split("-")[0],
       release_date: data.release_date,
@@ -105,6 +107,7 @@ router.get("/", async (req, res) => {
       poster: data.poster_path
         ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
         : null,
+      poster_path: data.poster_path ?? null,
       genre: data.genres.map((g) => g.name).join(", "),
       director:
         data.credits.crew.find((p) => p.job === "Director")?.name || "N/A",
@@ -118,7 +121,7 @@ router.get("/", async (req, res) => {
       country: data.production_countries.map((c) => c.name).join(", "),
     });
   } catch (err) {
-    console.error("TMDB API error:");
+    console.error("TMDB API error:", err.message);
     res.status(500).json({ error: "Failed to fetch movie data" });
   }
 });
@@ -130,7 +133,7 @@ router.get("/trending", async (req, res) => {
     const response = await axios.get(
       `https://api.themoviedb.org/3/trending/movie/week?api_key=${process.env.TMDB_API_KEY}&page=${page}`
     );
-    res.json(response.data.results.slice(0, 8)); // Get first 8 trending movies
+    res.json(response.data.results.slice(0, 8));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -163,7 +166,6 @@ router.get("/search", async (req, res) => {
       }&query=${encodeURIComponent(query)}`
     );
 
-    // Simplify and return key data for search results
     const simplifiedResults = response.data.results.map((movie) => ({
       id: movie.id,
       title: movie.title,

@@ -11,6 +11,10 @@ const UserWatchlistSchema = new mongoose.Schema({
   // Array of movies added by the user
   movies: [
     {
+      id: {
+        type: Number,
+        required: true,
+      },
       title: {
         type: String,
         required: true,
@@ -30,6 +34,10 @@ const UserWatchlistSchema = new mongoose.Schema({
       },
       rating: {
         type: Number,
+        required: true,
+      },
+      poster_path: {
+        type: String,
         required: true,
       },
       createdAt: {

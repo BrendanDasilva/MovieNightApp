@@ -33,16 +33,15 @@ const useWatchlistData = (setPosterMap, selectedPosters) => {
 
   // Load more visible movies (for infinite scroll)
   const loadMore = (filteredMovies) => {
-    if (isAppending || visibleMovies.length >= filteredMovies.length) return;
-    setIsAppending(true);
-    setTimeout(() => {
-      const next = filteredMovies.slice(
-        visibleMovies.length,
-        visibleMovies.length + CHUNK_SIZE
-      );
-      setVisibleMovies((prev) => [...prev, ...next]);
-      setIsAppending(false);
-    }, 500);
+    setVisibleMovies((prev) => {
+      const alreadyShown = new Set(prev.map((m) => m.id ?? m._id ?? m.title));
+
+      const newMovies = filteredMovies
+        .filter((m) => !alreadyShown.has(m.id ?? m._id ?? m.title))
+        .slice(0, CHUNK_SIZE);
+
+      return [...prev, ...newMovies];
+    });
   };
 
   // Fetch a poster image from TMDB and cache the result

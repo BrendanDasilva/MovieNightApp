@@ -146,9 +146,11 @@ const App = () => {
     if (!token || !movie?.title) return;
 
     try {
-      await axios.post("http://localhost:3001/watchlist/add", movie, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        "http://localhost:3001/watchlist/add",
+        { title: movie.title },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setWatchlistAlert(true);
       setTimeout(() => setWatchlistAlert(false), 3000);
       setWatchlistTitles((prev) => [...prev, movie.title]);

@@ -25,26 +25,34 @@ router.post("/add", authMiddleware, async (req, res) => {
   if (!title) {
     return res.status(400).json({ error: "Missing movie title" });
   }
-
+  console.log("🔍 Incoming title:", title);
   try {
     // Fetch full movie info from TMDB
     const tmdbRes = await fetch(
       `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
     );
     const data = await tmdbRes.json();
-
-    if (!data || !data.title || !data.release_date) {
+    console.log("📦 TMDB response:", data);
+    if (
+      !data ||
+      !data.title ||
+      !data.release_date ||
+      !data.id ||
+      !data.poster_path
+    ) {
       return res
         .status(400)
         .json({ error: "TMDB data incomplete or not found" });
     }
 
     const enrichedMovie = {
+      id: data.id,
       title: data.title,
       release_date: data.release_date,
       genre: data.genre,
       runtime: data.runtime,
       rating: data.rating,
+      poster_path: data.poster_path,
     };
 
     // Save movie if not already in watchlist
