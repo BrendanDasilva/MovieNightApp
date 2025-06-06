@@ -65,8 +65,8 @@ mongoose
     useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
   })
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // ================= Application Middleware =================
 app.use(express.json());
@@ -88,7 +88,7 @@ app.use((err, req, res, next) => {
 // ================= Server Start =================
 app.listen(3001, () => {
   console.log(
-    `🚀 Server running in ${isProduction ? "production" : "development"} mode`
+    `Server running in ${isProduction ? "production" : "development"} mode`
   );
   console.log(`   Listening on http://localhost:3001`);
 });

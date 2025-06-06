@@ -12,7 +12,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     const record = await UserWatchlist.findOne({ userId });
     res.json(record?.movies || []);
   } catch (err) {
-    console.error("❌ Failed to fetch watchlist:", err.message);
+    console.error("Failed to fetch watchlist:", err.message);
     res.status(500).json({ error: "Failed to fetch watchlist from database" });
   }
 });
@@ -64,7 +64,7 @@ router.post("/add", authMiddleware, async (req, res) => {
 
     res.json(record.movies);
   } catch (err) {
-    console.error("❌ Failed to enrich and add movie:", err.message);
+    console.error("Failed to enrich and add movie:", err.message);
     res.status(500).json({ error: "Failed to enrich or add movie" });
   }
 });
@@ -87,7 +87,7 @@ router.delete("/remove", authMiddleware, async (req, res) => {
     );
     res.json(record.movies);
   } catch (err) {
-    console.error("❌ Failed to remove movie:", err.message);
+    console.error("Failed to remove movie:", err.message);
     res.status(500).json({ error: "Failed to remove movie from watchlist" });
   }
 });

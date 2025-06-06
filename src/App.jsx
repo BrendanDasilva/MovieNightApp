@@ -72,9 +72,9 @@ const App = () => {
   const fetchWatchlistTitles = async () => {
     try {
       const res = await axios.get("http://localhost:3001/watchlist/me");
-      setWatchlistTitles(res.data.map((movie) => movie.title));
+      setWatchlistTitles(res.data); // store full movie objects
     } catch (err) {
-      console.error("❌ Failed to load watchlist titles", err.message);
+      console.error("Failed to load watchlist titles", err.message);
     }
   };
 
@@ -153,9 +153,9 @@ const App = () => {
       );
       setWatchlistAlert(true);
       setTimeout(() => setWatchlistAlert(false), 3000);
-      setWatchlistTitles((prev) => [...prev, movie.title]);
+      setWatchlistTitles((prev) => [...prev, movie]); // push full object
     } catch (err) {
-      console.error("❌ Failed to add to watchlist", err.message);
+      console.error("Failed to add to watchlist", err.message);
     }
   };
 
@@ -176,7 +176,7 @@ const App = () => {
       setWatchlistTitles((prev) => prev.filter((t) => t !== movie.title));
       console.log(`✅ Removed ${movie.title} from watchlist`);
     } catch (err) {
-      console.error("❌ Failed to remove from watchlist", err.message);
+      console.error("Failed to remove from watchlist", err.message);
     }
   };
 

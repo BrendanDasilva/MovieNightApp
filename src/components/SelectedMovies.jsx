@@ -23,16 +23,20 @@ const SelectedMovies = ({
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
-  // Pick 3 random titles from the watchlist and add them to the selection
+  // Pick up to 3 random movies from the watchlist and add them to the selection
   const handleRandom = () => {
-    if (!allWatchlistTitles.length) return;
-    const shuffled = [...allWatchlistTitles].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 3);
-    selected.forEach((movie) => {
-      if (!selectedPosters.some((m) => m.id === movie.id)) {
-        handleAddPoster(movie);
-      }
-    });
+    const alreadySelectedIds = new Set(selectedPosters.map((m) => m.id));
+    const availableMovies = allWatchlistTitles.filter(
+      (movie) => movie.id && !alreadySelectedIds.has(movie.id)
+    );
+
+    const slotsRemaining = 3 - selectedPosters.length;
+    if (slotsRemaining <= 0 || availableMovies.length === 0) return;
+
+    const shuffled = [...availableMovies].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, slotsRemaining);
+
+    selected.forEach((movie) => handleAddPoster(movie));
   };
 
   // Clear all selected posters
@@ -53,8 +57,6 @@ const SelectedMovies = ({
       await axios.post("http://localhost:3001/api/logs", { movies });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-
-      // Only clear the selected slots. Do NOT clear posterMap entirely.
       setSelectedPosters([]);
     } catch (err) {
       console.error("Failed to submit selection", err);
@@ -70,7 +72,6 @@ const SelectedMovies = ({
           : `translateX(-${PANEL_WIDTH_PX - BUTTON_VISIBLE_PX}px)`,
       }}
     >
-      {/* Header inside drawer */}
       <div className="px-4 py-4 flex justify-center">
         <Link
           to="/"
@@ -83,7 +84,6 @@ const SelectedMovies = ({
         </Link>
       </div>
 
-      {/* Toggle drawer */}
       <button
         onClick={toggleDrawer}
         className="self-end mt-4 mr-2 w-8 h-8 flex items-center justify-center bg-[#ff8000] text-white rounded-full focus:outline-none"
@@ -92,12 +92,10 @@ const SelectedMovies = ({
         {isDrawerOpen ? "←" : "→"}
       </button>
 
-      {/* Rotated label */}
       <span className="absolute top-1/2 right-[-4.5rem] transform -translate-y-1/2 rotate-90 text-white text-base font-bold whitespace-nowrap origin-center">
         Movie Night Selections
       </span>
 
-      {/* Selected movies */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
         <div className="space-y-6 flex flex-col items-center w-full">
           {[0, 1, 2].map((slotIdx) => {
@@ -138,7 +136,6 @@ const SelectedMovies = ({
         </div>
       </div>
 
-      {/* Action buttons */}
       <div className="p-4 flex flex-col items-center gap-3 text-white w-full">
         <button
           onClick={handleRandom}
@@ -154,7 +151,6 @@ const SelectedMovies = ({
         </button>
       </div>
 
-      {/* Confirm selection popup */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-xl text-center animate-fade-in">
@@ -182,7 +178,6 @@ const SelectedMovies = ({
         </div>
       )}
 
-      {/* Success toast */}
       {showSuccess && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#00e054] text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
           Selection logged successfully!
