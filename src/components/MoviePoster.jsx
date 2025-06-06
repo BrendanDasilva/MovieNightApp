@@ -21,7 +21,7 @@ const MoviePoster = ({
 
   // Determine if this movie is selected or in the watchlist
   const isSelected = selectedPosters.some((m) => m.id === movie.id);
-  const isInWatchlist = watchlistTitles.includes(title);
+  const isInWatchlist = watchlistTitles.some((m) => m?.title === title);
 
   // Get poster path from prop or TMDB
   const poster =
@@ -41,8 +41,8 @@ const MoviePoster = ({
   const toggleWatchlist = (e) => {
     e.stopPropagation();
     isInWatchlist
-      ? handleRemoveFromWatchlist?.({ title })
-      : handleAddToWatchlist?.({ title });
+      ? handleRemoveFromWatchlist?.(movie)
+      : handleAddToWatchlist?.(movie);
   };
 
   return (
@@ -63,15 +63,15 @@ const MoviePoster = ({
         </div>
       )}
 
-      {/* Top-right action button (either Add/Remove or Remove only in selection mode) */}
+      {/* Top-right action button */}
       <div className="absolute top-1.5 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         {mode === "default" ? (
           <button
             onClick={toggleSelection}
             title={isSelected ? "Remove" : "Add"}
             className={`
-              p-[6px] rounded-full border-2 border-white bg-black/60
-              flex items-center justify-center transition-colors duration-300 group/select
+              group/select p-[6px] rounded-full border-2 border-white bg-black/60
+              flex items-center justify-center transition-colors duration-300
               ${isSelected ? "hover:bg-red-700" : "hover:bg-green-700"}
             `}
           >
@@ -82,7 +82,7 @@ const MoviePoster = ({
               />
             ) : (
               <IoMdAdd
-                size={24}
+                size={22}
                 className="text-white transition-transform duration-300 group-hover/select:rotate-90"
               />
             )}
@@ -94,20 +94,20 @@ const MoviePoster = ({
               onRemove?.(title);
             }}
             title="Remove"
-            className="p-[6px] rounded-full border-2 border-white bg-black/60
-                       flex items-center justify-center transition-colors duration-300 group/remove hover:bg-red-700"
+            className="group/remove p-[6px] rounded-full border-2 border-white bg-black/60
+                       flex items-center justify-center transition-colors duration-300 hover:bg-red-700"
           >
             <IoMdRemove
-              size={20}
+              size={22}
               className="text-white transition-transform duration-300 group-hover/remove:rotate-180"
             />
           </button>
         )}
       </div>
 
-      {/* Bottom full-width button */}
-      {mode === "default" ? (
-        <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      {/* Bottom watchlist button */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {mode === "default" ? (
           <button
             onClick={toggleWatchlist}
             className={`
@@ -125,32 +125,28 @@ const MoviePoster = ({
           >
             {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
           </button>
-        </div>
-      ) : (
-        <div className="absolute bottom-0 left-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {selectedPosters.length === 3 ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect?.(title);
-              }}
-              className={`
-                w-full py-2 text-sm font-semibold text-white bg-black/60 relative overflow-hidden
-                transition-colors duration-300 hover:bg-transparent
-                before:absolute before:top-0 before:-left-full before:w-full before:h-full
-                before:transition-all before:duration-500 before:ease-in-out before:z-[-1]
-                before:bg-gradient-to-r before:from-green-500 before:to-green-700 hover:before:left-0
-              `}
-            >
-              Make Selection
-            </button>
-          ) : (
-            <div className="w-full py-2 text-sm font-semibold text-white bg-black/50 text-center">
-              Add 3 movies to enable selection
-            </div>
-          )}
-        </div>
-      )}
+        ) : selectedPosters.length === 3 ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.(title);
+            }}
+            className={`
+              w-full py-2 text-sm font-semibold text-white bg-black/60 relative overflow-hidden
+              transition-colors duration-300 hover:bg-transparent
+              before:absolute before:top-0 before:-left-full before:w-full before:h-full
+              before:transition-all before:duration-500 before:ease-in-out before:z-[-1]
+              before:bg-gradient-to-r before:from-green-500 before:to-green-700 hover:before:left-0
+            `}
+          >
+            Make Selection
+          </button>
+        ) : (
+          <div className="w-full py-2 text-sm font-semibold text-white bg-black/50 text-center">
+            Add 3 movies to enable selection
+          </div>
+        )}
+      </div>
     </div>
   );
 };

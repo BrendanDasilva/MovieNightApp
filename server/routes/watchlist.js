@@ -25,14 +25,13 @@ router.post("/add", authMiddleware, async (req, res) => {
   if (!title) {
     return res.status(400).json({ error: "Missing movie title" });
   }
-  console.log("🔍 Incoming title:", title);
   try {
     // Fetch full movie info from TMDB
     const tmdbRes = await fetch(
       `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
     );
+
     const data = await tmdbRes.json();
-    console.log("📦 TMDB response:", data);
     if (
       !data ||
       !data.title ||

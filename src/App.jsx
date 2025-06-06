@@ -173,8 +173,7 @@ const App = () => {
       });
       setWatchlistRemoveAlert(true);
       setTimeout(() => setWatchlistRemoveAlert(false), 3000);
-      setWatchlistTitles((prev) => prev.filter((t) => t !== movie.title));
-      console.log(`✅ Removed ${movie.title} from watchlist`);
+      setWatchlistTitles((prev) => prev.filter((t) => t.title !== movie.title));
     } catch (err) {
       console.error("Failed to remove from watchlist", err.message);
     }
