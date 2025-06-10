@@ -20,11 +20,14 @@ const Browse = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
-  // Search and result state
+  // Search input and mode state
   const [searchQuery, setSearchQuery] = useState(""); // user input
-  const { results, loading } = useTmdbSearch(searchQuery);
+  const [searchMode, setSearchMode] = useState("movie"); // "movie" or "actor"
 
-  // Deduplicate by TMDB ID so we don’t render the same movie multiple times
+  // Fetch results via TMDB API based on query
+  const { results, loading } = useTmdbSearch(searchQuery, searchMode);
+
+  // Deduplicate by TMDB ID to avoid duplicate movie renders
   const uniqueResults = results.filter(
     (movie, idx, arr) => arr.findIndex((m) => m.id === movie.id) === idx
   );
@@ -65,15 +68,22 @@ const Browse = ({
         <div className="w-full mx-auto p-10 bg-[#202830] text-white rounded shadow mb-10">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold">Browse Movies</h1>
+
+            {/* Search bar with mode toggle */}
             <div className="max-w-3xl text-black mx-auto">
               <SearchBox
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                searchMode={searchMode}
+                setSearchMode={setSearchMode}
               />
             </div>
+
+            {/* Loading indicator */}
             {loading && <LoadingDots />}
           </div>
 
+          {/* Render results if not loading */}
           {!loading && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
               {uniqueResults.map((movie, idx) => (

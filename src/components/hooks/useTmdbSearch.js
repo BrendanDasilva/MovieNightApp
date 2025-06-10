@@ -1,31 +1,56 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const useTmdbSearch = (searchQuery) => {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+// Custom hook for searching TMDB by movie title or actor name with pagination support
+const useTmdbSearch = (searchQuery, searchMode = "movie", page = 1) => {
+  const [results, setResults] = useState([]); // Search results (array of movies)
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Optional error state
 
   useEffect(() => {
-    const searchMovies = async () => {
-      if (searchQuery.length < 3) return;
+    const fetchResults = async () => {
+      if (searchQuery.length < 3) {
+        setResults([]);
+        return;
+      }
+
       setLoading(true);
+      setError(null);
+
       try {
-        const res = await axios.get(
-          `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}`
-        );
-        setResults(res.data);
+        if (searchMode === "actor") {
+          // Actor search — returns all known-for movies
+          const actorRes = await axios.get(
+            `/api/tmdb/actor?query=${encodeURIComponent(searchQuery)}`
+          );
+          const movies = actorRes.data || [];
+          setResults(movies);
+        } else {
+          // Movie search — paginated enrichment supported
+          const movieRes = await axios.get(
+            `/api/tmdb/search?query=${encodeURIComponent(
+              searchQuery
+            )}&page=${page}`
+          );
+          const movies = movieRes.data || [];
+
+          // If page === 1, replace; if page > 1, append results
+          setResults((prev) => (page === 1 ? movies : [...prev, ...movies]));
+        }
       } catch (err) {
-        console.error("Search error:", err);
+        console.error("TMDB search failed:", err.message);
+        setError("Failed to fetch TMDB results");
+        setResults([]);
       } finally {
         setLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(searchMovies, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+    const debounce = setTimeout(fetchResults, 500);
+    return () => clearTimeout(debounce);
+  }, [searchQuery, searchMode, page]);
 
-  return { results, loading };
+  return { results, loading, error };
 };
 
 export default useTmdbSearch;

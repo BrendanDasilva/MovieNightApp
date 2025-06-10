@@ -160,28 +160,92 @@ router.get("/genre/:genreId", async (req, res) => {
   }
 });
 
-// GET /tmdb/search — perform a title search
+// GET /tmdb/search — perform a paginated title search and enrich results
 router.get("/search", async (req, res) => {
+  const { query, page = 1 } = req.query;
+  if (!query) return res.status(400).json({ error: "Query is required" });
+
   try {
-    const { query } = req.query;
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/search/movie?api_key=${
-        process.env.TMDB_API_KEY
-      }&query=${encodeURIComponent(query)}`
+    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(
+      query
+    )}&page=${page}`;
+    const searchRes = await axios.get(searchUrl);
+    const basicResults = searchRes.data.results.filter((m) => m.poster_path);
+
+    // Enrich top 20 with full movie details
+    const enriched = await Promise.all(
+      basicResults.slice(0, 20).map(async (movie) => {
+        try {
+          const movieRes = await axios.get(
+            `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbKey}`
+          );
+          const data = movieRes.data;
+
+          return {
+            id: data.id,
+            title: data.title,
+            poster_path: data.poster_path,
+            release_date: data.release_date,
+            overview: data.overview,
+            vote_average: data.vote_average,
+            runtime: data.runtime,
+            genre: data.genres.map((g) => g.name).join(", "),
+          };
+        } catch (err) {
+          console.warn(`Failed to enrich movie ID ${movie.id}`);
+          return null;
+        }
+      })
     );
 
-    const simplifiedResults = response.data.results.map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      poster_path: movie.poster_path,
-      release_date: movie.release_date,
-      overview: movie.overview,
-      vote_average: movie.vote_average,
-    }));
-
-    res.json(simplifiedResults);
+    // Filter out failed lookups
+    const filtered = enriched.filter(Boolean);
+    res.json(filtered);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("TMDB search error:", err.message);
+    res.status(500).json({ error: "Failed to search TMDB" });
+  }
+});
+
+// GET /tmdb/actor — search for actor and return their top movie credits
+router.get("/actor", async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ error: "Query is required" });
+
+  try {
+    // Step 1: search for the person (actor)
+    const searchUrl = `https://api.themoviedb.org/3/search/person?api_key=${tmdbKey}&query=${encodeURIComponent(
+      query
+    )}`;
+    const searchRes = await axios.get(searchUrl);
+    const person = searchRes.data.results?.[0];
+
+    if (!person) {
+      return res.status(404).json({ error: "Actor not found on TMDB" });
+    }
+
+    // Step 2: get movie credits for the actor
+    const creditsUrl = `https://api.themoviedb.org/3/person/${person.id}/movie_credits?api_key=${tmdbKey}`;
+    const creditsRes = await axios.get(creditsUrl);
+    const movies = creditsRes.data.cast || [];
+
+    // Step 3: format and return results
+    const formatted = movies
+      .filter((m) => m.poster_path) // require posters
+      .sort((a, b) => b.popularity - a.popularity) // sort by popularity
+      .map((movie) => ({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        release_date: movie.release_date,
+        overview: movie.overview,
+        vote_average: movie.vote_average,
+      }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("TMDB actor search error:", err.message);
+    res.status(500).json({ error: "Failed to search actor on TMDB" });
   }
 });
 
