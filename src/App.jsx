@@ -148,7 +148,7 @@ const App = () => {
     try {
       await axios.post(
         "http://localhost:3001/watchlist/add",
-        { title: movie.title },
+        { id: movie.id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setWatchlistAlert(true);

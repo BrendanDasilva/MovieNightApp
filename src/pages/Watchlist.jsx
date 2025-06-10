@@ -152,7 +152,7 @@ const Watchlist = ({
                   selectedPosters={selectedPosters}
                   handleAddPoster={handleAddPoster}
                   handleRemovePoster={handleRemovePoster}
-                  watchlistTitles={allMovies}
+                  watchlistTitles={allMovies.map((m) => m.title)}
                   handleAddToWatchlist={() => onAddToWatchlist(movie)}
                   handleRemoveFromWatchlist={async () => {
                     await onRemoveFromWatchlist(movie);

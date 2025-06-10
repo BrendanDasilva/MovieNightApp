@@ -20,17 +20,15 @@ router.get("/me", authMiddleware, async (req, res) => {
 // POST /watchlist/add — add one movie to watchlist
 router.post("/add", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const { title } = req.body;
+  const { id } = req.body;
 
-  if (!title) {
-    return res.status(400).json({ error: "Missing movie title" });
+  if (!id) {
+    return res.status(400).json({ error: "Missing TMDB movie ID" });
   }
-  try {
-    // Fetch full movie info from TMDB
-    const tmdbRes = await fetch(
-      `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
-    );
 
+  // Fetch full movie info from TMDB
+  const tmdbRes = await fetch(`http://localhost:3001/tmdb?id=${id}`);
+  try {
     const data = await tmdbRes.json();
     if (
       !data ||
@@ -71,17 +69,17 @@ router.post("/add", authMiddleware, async (req, res) => {
 // DELETE /watchlist/remove — remove one movie from watchlist by title
 router.delete("/remove", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const { title } = req.body;
+  const { id } = req.body;
 
-  if (!title) {
-    return res.status(400).json({ error: "Missing movie title" });
+  if (!id) {
+    return res.status(400).json({ error: "Missing movie ID" });
   }
 
   try {
     // Remove the movie with a matching title from the user's watchlist
     const record = await UserWatchlist.findOneAndUpdate(
       { userId },
-      { $pull: { movies: { title } } },
+      { $pull: { movies: { id } } },
       { new: true }
     );
     res.json(record.movies);

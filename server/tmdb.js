@@ -7,7 +7,7 @@ dotenv.config();
 const router = express.Router();
 const tmdbKey = process.env.TMDB_API_KEY;
 
-// GET /tmdb — fetch movie details by title (and optional year)
+// GET /tmdb — fetch movie details by title (and optional year) or by TMDB ID
 router.get("/", async (req, res) => {
   const movieIdParam = req.query.id;
 
@@ -47,6 +47,8 @@ router.get("/", async (req, res) => {
           .join(", "),
         language: data.original_language,
         country: data.production_countries.map((c) => c.name).join(", "),
+        production_companies: data.production_companies || [],
+        production_countries: data.production_countries || [],
       });
     } catch (err) {
       console.error("TMDB fetch by ID error:", err.message);
@@ -119,6 +121,8 @@ router.get("/", async (req, res) => {
         .join(", "),
       language: data.original_language,
       country: data.production_countries.map((c) => c.name).join(", "),
+      production_companies: data.production_companies || [],
+      production_countries: data.production_countries || [],
     });
   } catch (err) {
     console.error("TMDB API error:", err.message);

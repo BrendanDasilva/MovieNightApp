@@ -35,32 +35,30 @@ const useWatchlistData = (setPosterMap, selectedPosters) => {
   const loadMore = (filteredMovies) => {
     setVisibleMovies((prev) => {
       const alreadyShown = new Set(prev.map((m) => m.id ?? m._id ?? m.title));
-
       const newMovies = filteredMovies
         .filter((m) => !alreadyShown.has(m.id ?? m._id ?? m.title))
         .slice(0, CHUNK_SIZE);
-
       return [...prev, ...newMovies];
     });
   };
 
-  // Fetch a poster image from TMDB and cache the result
-  const fetchPoster = async (title) => {
-    if (!title || fetchCache.current[title]) return;
+  // Fetch a poster image from TMDB by movie ID and cache it
+  const fetchPoster = async (movie) => {
+    const id = movie?.id;
+    if (!id || fetchCache.current[id]) return;
+
     try {
-      fetchCache.current[title] = { status: "pending" };
-      const res = await axios.get(
-        `http://localhost:3001/tmdb?title=${encodeURIComponent(title)}`
-      );
+      fetchCache.current[id] = { status: "pending" };
+      const res = await axios.get(`http://localhost:3001/tmdb?id=${id}`);
       const poster = res.data.poster || null;
-      fetchCache.current[title] = { status: "success", poster };
-      setPosterMap((prev) => ({ ...prev, [title]: poster }));
-      setPosterErrors((prev) => ({ ...prev, [title]: null }));
+      fetchCache.current[id] = { status: "success", poster };
+      setPosterMap((prev) => ({ ...prev, [id]: poster }));
+      setPosterErrors((prev) => ({ ...prev, [id]: null }));
     } catch (err) {
-      fetchCache.current[title] = { status: "error" };
+      fetchCache.current[id] = { status: "error" };
       setPosterErrors((prev) => ({
         ...prev,
-        [title]: "Failed to load poster",
+        [id]: "Failed to load poster",
       }));
     }
   };
@@ -69,12 +67,9 @@ const useWatchlistData = (setPosterMap, selectedPosters) => {
   useEffect(() => {
     const fetchVisiblePosters = async () => {
       const toFetch = visibleMovies.filter(
-        (movie) =>
-          movie?.title &&
-          !posterErrors[movie.title] &&
-          !fetchCache.current[movie.title]
+        (m) => m?.id && !posterErrors[m.id] && !fetchCache.current[m.id]
       );
-      await Promise.allSettled(toFetch.map((m) => fetchPoster(m.title)));
+      await Promise.allSettled(toFetch.map((m) => fetchPoster(m)));
     };
     fetchVisiblePosters();
   }, [visibleMovies]);
@@ -83,9 +78,9 @@ const useWatchlistData = (setPosterMap, selectedPosters) => {
   useEffect(() => {
     const fetchSelectedPosters = async () => {
       const toFetch = selectedPosters.filter(
-        (title) => title && !posterErrors[title] && !fetchCache.current[title]
+        (m) => m?.id && !posterErrors[m.id] && !fetchCache.current[m.id]
       );
-      await Promise.allSettled(toFetch.map((title) => fetchPoster(title)));
+      await Promise.allSettled(toFetch.map((m) => fetchPoster(m)));
     };
     fetchSelectedPosters();
   }, [selectedPosters]);

@@ -26,7 +26,7 @@ const MoviePoster = ({
   // Get poster path from prop or TMDB
   const poster =
     posterUrl ||
-    posterMap?.[title] ||
+    posterMap?.[movie.id] ||
     (movie.poster_path
       ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
       : null);
