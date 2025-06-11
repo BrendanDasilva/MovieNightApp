@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     // Filter and format top 5 movie-related articles
     const articles = response.data.articles
       .filter((article) => article.title.toLowerCase().includes("movie"))
-      .slice(0, 5)
+      .slice(0, 6)
       .map((article) => ({
         title: article.title,
         excerpt: article.description,
@@ -23,6 +23,7 @@ router.get("/", async (req, res) => {
         }),
         url: article.url,
         source: article.source.name,
+        image: article.urlToImage || null,
       }));
 
     res.json(articles);
