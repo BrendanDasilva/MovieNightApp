@@ -34,7 +34,7 @@ const Logs = ({ isDrawerOpen }) => {
     <div className="min-h-screen flex flex-col">
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Page title */}
-        <h1 className="text-2xl font-bold mb-10 p-10 text-white text-center bg-[#202830] rounded shadow">
+        <h1 className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5 text-center text-white text-2xl">
           Movie Selection History
         </h1>
 
@@ -47,7 +47,7 @@ const Logs = ({ isDrawerOpen }) => {
           logs.map((log, idx) => (
             <div
               key={idx}
-              className="mb-10 p-10 bg-[#202830] text-white rounded shadow"
+              className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5 text-white"
             >
               {/* Human-readable log date */}
               <h3 className="text-lg font-semibold mb-4">

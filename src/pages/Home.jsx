@@ -72,8 +72,8 @@ const Home = ({
 
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* ---- Header Section ---- */}
-        <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
-          <h1 className="text-5xl font-bold mb-10 text-center">
+        <div className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
+          <h1 className="text-5xl font-bold mb-10 text-center text-white">
             Welcome to the Movie Night App!
           </h1>
           <p className=" text-white text-lg m-10">
@@ -101,7 +101,7 @@ const Home = ({
         </div>
 
         {/* ---- Last Movie Night Selection ---- */}
-        <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
           <h3 className="text-center text-white text-2xl mb-10">
             Here’s what you chose between last time…
           </h3>
@@ -165,9 +165,11 @@ const Home = ({
         </div>
 
         {/* Trending Section */}
-        <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-2xl font-bold">Trending This Week</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Trending This Week
+            </h2>
           </div>
           {loading.trending ? (
             <LoadingDots />
@@ -198,9 +200,9 @@ const Home = ({
         </div>
 
         {/* Genre Spotlight */}
-        <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-2xl font-bold text-white">
               Popular in {selectedGenre.name}
             </h2>
 
@@ -252,9 +254,9 @@ const Home = ({
         </div>
 
         {/* News Section */}
-        <div className="w-full max-w-[1600px] mb-10 p-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full max-w-[1600px] mb-10 p-10 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-2xl font-bold">Latest Movie News</h2>
+            <h2 className="text-2xl font-bold text-white">Latest Movie News</h2>
           </div>
           {loading.news ? <LoadingDots /> : <LatestNews articles={news} />}
         </div>

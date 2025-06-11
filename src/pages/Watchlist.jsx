@@ -111,10 +111,12 @@ const Watchlist = ({
 
       <PageWrapper isDrawerOpen={isDrawerOpen}>
         {/* Outer container */}
-        <div className="w-full mx-auto mb-10 bg-[#202830] text-white rounded shadow">
+        <div className="w-full max-w-[1600px] mb-10 p-2 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] rounded-2xl ring-1 ring-white/5">
           {/* Header + search bar */}
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold pt-10 mb-4">Your Watchlist</h2>
+            <h2 className="text-2xl font-bold pt-10 mb-4 text-white">
+              Your Watchlist
+            </h2>
             <SearchBox
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}

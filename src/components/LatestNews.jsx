@@ -13,15 +13,17 @@ const LatestNews = ({ articles, loading, error }) => {
           {/* Article header with date, source, and title */}
           <div className="flex justify-between items-start mb-2">
             <div>
-              <div className="text-sm text-gray-400 mb-1">
+              <div className="text-sm text-white mb-1">
                 {article.date} • {article.source}
               </div>
-              <h3 className="text-lg font-medium mb-2">{article.title}</h3>
+              <h3 className="text-lg font-medium mb-2 text-white">
+                {article.title}
+              </h3>
             </div>
           </div>
 
           {/* Article excerpt and link */}
-          <p className="text-gray-300 text-sm mb-2">{article.excerpt}</p>
+          <p className="text-white text-sm mb-2">{article.excerpt}</p>
           <a
             href={article.url}
             target="_blank"
