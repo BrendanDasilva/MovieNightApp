@@ -233,17 +233,47 @@ const MovieModal = ({
                 <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
               )}
 
-              {/* Genres */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {details.genre.split(", ").map((g) => (
-                  <span
-                    key={g}
-                    className="bg-gray-700 text-xs px-3 py-1 rounded-full uppercase"
+              {/* Genres and Rating Row */}
+              <div className="flex justify-between items-center mb-4">
+                {/* Genres */}
+                <div className="flex flex-wrap gap-2">
+                  {details.genre.split(", ").map((g) => (
+                    <span
+                      key={g}
+                      className="bg-gray-700 text-xs px-3 py-1 rounded-full uppercase"
+                    >
+                      {g}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Rating */}
+                {details.rating && (
+                  <div
+                    className={`flex items-center gap-1 text-sm font-bold px-3 py-1 rounded shadow ${
+                      Number(details.rating) < 2
+                        ? "bg-red-700"
+                        : Number(details.rating) < 4
+                        ? "bg-orange-600"
+                        : Number(details.rating) < 6
+                        ? "bg-yellow-500"
+                        : Number(details.rating) < 8
+                        ? "bg-lime-500"
+                        : "bg-green-600"
+                    }`}
                   >
-                    {g}
-                  </span>
-                ))}
+                    {Number(details.rating).toFixed(1)}{" "}
+                    <span className="text-white">★</span>
+                  </div>
+                )}
               </div>
+
+              {/* Runtime */}
+              {details.runtime && (
+                <p className="text-sm text-gray-200 mb-2">
+                  <strong>Runtime:</strong> {details.runtime}
+                </p>
+              )}
 
               {/* Plot */}
               {details.plot && (
@@ -327,23 +357,6 @@ const MovieModal = ({
                 </p>
               )}
             </div>
-            {details.rating && (
-              <div
-                className={`absolute bottom-4 right-4 text-white font-bold text-sm px-3 py-2 rounded shadow-lg ${
-                  Number(details.rating) < 2
-                    ? "bg-red-700"
-                    : Number(details.rating) < 4
-                    ? "bg-orange-600"
-                    : Number(details.rating) < 6
-                    ? "bg-yellow-500"
-                    : Number(details.rating) < 8
-                    ? "bg-lime-500"
-                    : "bg-green-600"
-                }`}
-              >
-                {Number(details.rating).toFixed(1)}
-              </div>
-            )}
           </div>
         )}
       </div>

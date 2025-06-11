@@ -6,6 +6,9 @@ import MoviePoster from "../components/MoviePoster";
 import PageWrapper from "../components/PageWrapper";
 import useTmdbSearch from "../components/hooks/useTmdbSearch";
 import Toast from "../components/Toast";
+import BrowseFilters from "../components/BrowseFilters";
+import useFilteredTmdbMovies from "../components/hooks/useFilteredTmdbMovies";
+import useGenres from "../components/hooks/useGenres";
 
 // Browse page: allows user to search TMDB movies and add/remove them from their watchlist
 const Browse = ({
@@ -20,30 +23,38 @@ const Browse = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
-  // Search input and mode state
-  const [searchQuery, setSearchQuery] = useState(""); // user input
-  const [searchMode, setSearchMode] = useState("movie"); // "movie" or "actor"
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState("movie");
 
-  // Fetch results via TMDB API based on query
+  const [selectedDecade, setSelectedDecade] = useState("All");
+  const [selectedGenreId, setSelectedGenreId] = useState("All");
+  const [sortBy, setSortBy] = useState("popularityDesc");
+
+  const genres = useGenres();
+
   const { results, loading } = useTmdbSearch(searchQuery, searchMode);
 
-  // Deduplicate by TMDB ID to avoid duplicate movie renders
   const uniqueResults = results.filter(
     (movie, idx, arr) => arr.findIndex((m) => m.id === movie.id) === idx
   );
 
-  // Toast alerts for watchlist changes
+  const filteredResults = useFilteredTmdbMovies(
+    uniqueResults,
+    searchQuery,
+    selectedDecade,
+    selectedGenreId,
+    sortBy
+  );
+
   const [watchlistAlert, setWatchlistAlert] = useState(false);
   const [watchlistRemoveAlert, setWatchlistRemoveAlert] = useState(false);
 
-  // Wrapper to add + show toast
   const onAddToWatchlist = async (movie) => {
     await handleAddToWatchlist(movie);
     setWatchlistAlert(true);
     setTimeout(() => setWatchlistAlert(false), 3000);
   };
 
-  // Wrapper to remove + show toast
   const onRemoveFromWatchlist = async (movie) => {
     await handleRemoveFromWatchlist(movie);
     setWatchlistRemoveAlert(true);
@@ -52,7 +63,6 @@ const Browse = ({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Toasts */}
       <Toast
         visible={watchlistAlert}
         message="Movie added to watchlist"
@@ -76,17 +86,30 @@ const Browse = ({
                 setSearchQuery={setSearchQuery}
                 searchMode={searchMode}
                 setSearchMode={setSearchMode}
+                enableModeToggle={true}
               />
             </div>
 
-            {/* Loading indicator */}
+            {/* Filters */}
+            {searchQuery.length > 2 && (
+              <BrowseFilters
+                genres={genres}
+                selectedGenreId={selectedGenreId}
+                setSelectedGenreId={setSelectedGenreId}
+                selectedDecade={selectedDecade}
+                setSelectedDecade={setSelectedDecade}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+              />
+            )}
+
             {loading && <LoadingDots />}
           </div>
 
-          {/* Render results if not loading */}
+          {/* Results grid */}
           {!loading && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
-              {uniqueResults.map((movie, idx) => (
+              {filteredResults.map((movie, idx) => (
                 <MoviePoster
                   key={idx}
                   movie={movie}
@@ -105,7 +128,6 @@ const Browse = ({
         </div>
       </PageWrapper>
 
-      {/* Site footer */}
       <Footer />
     </div>
   );
