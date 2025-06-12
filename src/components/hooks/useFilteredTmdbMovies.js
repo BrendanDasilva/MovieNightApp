@@ -1,43 +1,39 @@
 import { useMemo } from "react";
 
-// Filters and sorts TMDB movies by search, genre, decade, and sort option
 const useFilteredTmdbMovies = (
   movies,
   searchQuery,
   selectedDecade,
   selectedGenreId,
-  sortBy
+  sortBy,
+  mode // <-- ADD THIS
 ) => {
   return useMemo(() => {
     let filtered = [...movies];
 
-    // Filter by search query
-    if (searchQuery) {
+    // 🛑 For actor mode, skip title filtering
+    if (searchQuery && mode !== "actor") {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((movie) =>
         movie.title?.toLowerCase().includes(query)
       );
     }
 
-    // Filter by genre
+    // Genre filter
     if (selectedGenreId !== "All") {
       filtered = filtered.filter((movie) =>
         movie.genre?.split(", ").includes(selectedGenreId)
       );
     }
 
-    // Filter by decade
+    // Decade filter
     if (selectedDecade !== "All") {
       filtered = filtered.filter((movie) => {
         const year = parseInt(movie.release_date?.slice(0, 4));
         if (isNaN(year)) return false;
-
-        switch (selectedDecade) {
-          case "Earlier":
-            return year < 1950;
-          default:
-            return String(year).startsWith(selectedDecade.slice(0, 3));
-        }
+        return selectedDecade === "Earlier"
+          ? year < 1950
+          : String(year).startsWith(selectedDecade.slice(0, 3));
       });
     }
 
@@ -71,7 +67,7 @@ const useFilteredTmdbMovies = (
     }
 
     return filtered;
-  }, [movies, searchQuery, selectedGenreId, selectedDecade, sortBy]);
+  }, [movies, searchQuery, selectedGenreId, selectedDecade, sortBy, mode]);
 };
 
 export default useFilteredTmdbMovies;

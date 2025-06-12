@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
@@ -24,6 +25,7 @@ const MovieModal = ({
   const [activeTab, setActiveTab] = useState("cast"); // UI tab state
 
   const cacheKey = useRef("");
+  const navigate = useNavigate();
 
   // Fetch movie details from TMDB or use cached value
   useEffect(() => {
@@ -121,7 +123,7 @@ const MovieModal = ({
       onClick={handleBackgroundClick}
     >
       <div className="bg-[#14181c] text-white w-full max-w-4xl max-h-[90vh] p-6 rounded-lg shadow-xl relative overflow-y-auto animate-fade-in">
-        {/* Close modal */}
+        {/* Close modal button */}
         <button
           className="absolute top-3 right-4 text-gray-400 hover:text-white text-2xl"
           onClick={onClose}
@@ -160,7 +162,7 @@ const MovieModal = ({
           <div className="text-red-500 text-center py-10">{details.error}</div>
         ) : (
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Poster and buttons */}
+            {/* Poster and action buttons */}
             <div className="w-full md:w-1/3 relative">
               <img
                 src={details.poster}
@@ -172,7 +174,7 @@ const MovieModal = ({
                 }}
               />
 
-              {/* Selection toggle */}
+              {/* Selection toggle button */}
               <div className="absolute top-2 right-2 z-10">
                 <button
                   onClick={(e) => {
@@ -197,7 +199,7 @@ const MovieModal = ({
                 </button>
               </div>
 
-              {/* Watchlist button */}
+              {/* Watchlist add/remove button */}
               <div className="absolute bottom-0 left-0 right-0 z-10">
                 <button
                   onClick={async (e) => {
@@ -222,7 +224,7 @@ const MovieModal = ({
               </div>
             </div>
 
-            {/* Movie info */}
+            {/* Movie info section */}
             <div className="flex-1">
               <h2 className="text-3xl font-bold mb-2">
                 {details.title}
@@ -233,9 +235,8 @@ const MovieModal = ({
                 <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
               )}
 
-              {/* Genres and Rating Row */}
+              {/* Genre tags and rating badge */}
               <div className="flex justify-between items-center mb-4">
-                {/* Genres */}
                 <div className="flex flex-wrap gap-2">
                   {details.genre.split(", ").map((g) => (
                     <span
@@ -247,7 +248,6 @@ const MovieModal = ({
                   ))}
                 </div>
 
-                {/* Rating */}
                 {details.rating && (
                   <div
                     className={`flex items-center gap-1 text-sm font-bold px-3 py-1 rounded shadow ${
@@ -268,21 +268,21 @@ const MovieModal = ({
                 )}
               </div>
 
-              {/* Runtime */}
+              {/* Runtime display */}
               {details.runtime && (
                 <p className="text-sm text-gray-200 mb-2">
                   <strong>Runtime:</strong> {details.runtime}
                 </p>
               )}
 
-              {/* Plot */}
+              {/* Plot summary */}
               {details.plot && (
                 <p className="text-sm text-gray-200 mb-4">
                   <strong>Plot:</strong> {details.plot}
                 </p>
               )}
 
-              {/* Tabs */}
+              {/* Tab buttons */}
               <div className="mb-4 border-b border-gray-700">
                 <button
                   onClick={() => setActiveTab("cast")}
@@ -316,16 +316,24 @@ const MovieModal = ({
                 </button>
               </div>
 
-              {/* Tab Content */}
+              {/* Tab content */}
               {activeTab === "cast" && (
                 <div className="flex flex-wrap gap-2">
                   {details.actors?.split(", ").map((actor) => (
-                    <span
+                    <button
                       key={actor}
-                      className="bg-gray-700 text-xs px-3 py-1 rounded-full"
+                      onClick={() => {
+                        navigate(
+                          `/browse?query=${encodeURIComponent(
+                            actor
+                          )}&mode=actor`
+                        );
+                        onClose();
+                      }}
+                      className="bg-gray-700 text-xs px-3 py-1 rounded-full hover:bg-purple-600 transition"
                     >
                       {actor}
-                    </span>
+                    </button>
                   ))}
                 </div>
               )}

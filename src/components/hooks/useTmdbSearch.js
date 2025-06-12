@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-// Custom hook for searching TMDB by movie title or actor name with pagination support
-const useTmdbSearch = (searchQuery, searchMode = "movie", page = 1) => {
-  const [results, setResults] = useState([]); // Search results (array of movies)
+// Custom hook for searching TMDB by movie title or actor name with pagination
+const useTmdbSearch = (
+  searchQuery,
+  searchMode = "movie",
+  page = 1,
+  limit = 20
+) => {
+  const [results, setResults] = useState([]); // Fetched results
   const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(null); // Optional error state
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
     const fetchResults = async () => {
+      // Skip fetch if search query is too short
       if (searchQuery.length < 3) {
         setResults([]);
         return;
@@ -18,25 +24,22 @@ const useTmdbSearch = (searchQuery, searchMode = "movie", page = 1) => {
       setError(null);
 
       try {
-        if (searchMode === "actor") {
-          // Actor search — returns all known-for movies
-          const actorRes = await axios.get(
-            `/api/tmdb/actor?query=${encodeURIComponent(searchQuery)}`
-          );
-          const movies = actorRes.data || [];
-          setResults(movies);
-        } else {
-          // Movie search — paginated enrichment supported
-          const movieRes = await axios.get(
-            `/api/tmdb/search?query=${encodeURIComponent(
-              searchQuery
-            )}&page=${page}`
-          );
-          const movies = movieRes.data || [];
+        let url = "";
 
-          // If page === 1, replace; if page > 1, append results
-          setResults((prev) => (page === 1 ? movies : [...prev, ...movies]));
+        if (searchMode === "actor") {
+          // Actor search endpoint with pagination
+          url = `/api/tmdb/actor?query=${encodeURIComponent(
+            searchQuery
+          )}&page=${page}&limit=${limit}`;
+        } else {
+          // Movie search endpoint with pagination
+          url = `/api/tmdb/search?query=${encodeURIComponent(
+            searchQuery
+          )}&page=${page}&limit=${limit}`;
         }
+
+        const res = await axios.get(url);
+        setResults(res.data || []);
       } catch (err) {
         console.error("TMDB search failed:", err.message);
         setError("Failed to fetch TMDB results");
@@ -46,9 +49,9 @@ const useTmdbSearch = (searchQuery, searchMode = "movie", page = 1) => {
       }
     };
 
-    const debounce = setTimeout(fetchResults, 500);
+    const debounce = setTimeout(fetchResults, 500); // Debounce user typing
     return () => clearTimeout(debounce);
-  }, [searchQuery, searchMode, page]);
+  }, [searchQuery, searchMode, page, limit]);
 
   return { results, loading, error };
 };

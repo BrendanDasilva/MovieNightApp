@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import SearchBox from "../components/SearchBox";
 import LoadingDots from "../components/LoadingDots";
 import Footer from "../components/Footer";
@@ -10,7 +11,7 @@ import BrowseFilters from "../components/BrowseFilters";
 import useFilteredTmdbMovies from "../components/hooks/useFilteredTmdbMovies";
 import useGenres from "../components/hooks/useGenres";
 
-// Browse page: allows user to search TMDB movies and add/remove them from their watchlist
+// Browse page: allows searching TMDB (movies or actors), filtering, and paginating
 const Browse = ({
   selectedPosters,
   posterMap,
@@ -23,6 +24,8 @@ const Browse = ({
   handleRemoveFromWatchlist,
   isDrawerOpen,
 }) => {
+  const [searchParams] = useSearchParams();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState("movie");
 
@@ -30,20 +33,41 @@ const Browse = ({
   const [selectedGenreId, setSelectedGenreId] = useState("All");
   const [sortBy, setSortBy] = useState("popularityDesc");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const RESULTS_PER_PAGE = 20;
+
+  // Pull from URL query params
+  useEffect(() => {
+    const queryFromUrl = searchParams.get("query");
+    const modeFromUrl = searchParams.get("mode");
+
+    if (queryFromUrl) setSearchQuery(queryFromUrl);
+    if (modeFromUrl) setSearchMode(modeFromUrl);
+  }, [searchParams]);
+
   const genres = useGenres();
 
-  const { results, loading } = useTmdbSearch(searchQuery, searchMode);
+  // Fetch search results from backend (paginated)
+  const { results, loading } = useTmdbSearch(
+    searchQuery,
+    searchMode,
+    currentPage,
+    RESULTS_PER_PAGE
+  );
 
+  // De-dupe by movie ID
   const uniqueResults = results.filter(
     (movie, idx, arr) => arr.findIndex((m) => m.id === movie.id) === idx
   );
 
+  // Apply filters
   const filteredResults = useFilteredTmdbMovies(
     uniqueResults,
     searchQuery,
     selectedDecade,
     selectedGenreId,
-    sortBy
+    sortBy,
+    searchMode
   );
 
   const [watchlistAlert, setWatchlistAlert] = useState(false);
@@ -60,6 +84,11 @@ const Browse = ({
     setWatchlistRemoveAlert(true);
     setTimeout(() => setWatchlistRemoveAlert(false), 3000);
   };
+
+  // Reset to page 1 on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, searchMode, selectedDecade, selectedGenreId, sortBy]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -106,24 +135,56 @@ const Browse = ({
             {loading && <LoadingDots />}
           </div>
 
-          {/* Results grid */}
-          {!loading && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
-              {filteredResults.map((movie, idx) => (
-                <MoviePoster
-                  key={idx}
-                  movie={movie}
-                  posterMap={posterMap}
-                  setSelectedMovie={setSelectedMovie}
-                  selectedPosters={selectedPosters}
-                  handleAddPoster={handleAddPoster}
-                  handleRemovePoster={handleRemovePoster}
-                  watchlistTitles={watchlistTitles}
-                  handleAddToWatchlist={() => onAddToWatchlist(movie)}
-                  handleRemoveFromWatchlist={() => onRemoveFromWatchlist(movie)}
-                />
-              ))}
-            </div>
+          {/* Movie results grid + pagination */}
+          {!loading && searchQuery.length > 2 && (
+            <>
+              {/* Results */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
+                {filteredResults.map((movie, idx) => (
+                  <MoviePoster
+                    key={idx}
+                    movie={movie}
+                    posterMap={posterMap}
+                    setSelectedMovie={setSelectedMovie}
+                    selectedPosters={selectedPosters}
+                    handleAddPoster={handleAddPoster}
+                    handleRemovePoster={handleRemovePoster}
+                    watchlistTitles={watchlistTitles}
+                    handleAddToWatchlist={() => onAddToWatchlist(movie)}
+                    handleRemoveFromWatchlist={() =>
+                      onRemoveFromWatchlist(movie)
+                    }
+                  />
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {filteredResults.length > 0 && (
+                <div className="flex justify-center mt-8 gap-4 text-white">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 disabled:opacity-30"
+                  >
+                    Previous
+                  </button>
+
+                  <span className="px-4 py-2 font-semibold">
+                    Page {currentPage}
+                  </span>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={filteredResults.length < RESULTS_PER_PAGE}
+                    className="px-4 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 disabled:opacity-30"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </PageWrapper>
