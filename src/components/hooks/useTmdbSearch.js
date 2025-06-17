@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-// Custom hook for searching TMDB by movie title or actor name with pagination
+// Custom hook for searching TMDB by movie title, actor name, or director name with pagination
 const useTmdbSearch = (
   searchQuery,
   searchMode = "movie",
@@ -30,6 +30,10 @@ const useTmdbSearch = (
 
         if (searchMode === "actor") {
           url = `/api/tmdb/actor?query=${encodeURIComponent(
+            searchQuery
+          )}&page=${page}&limit=${limit}`;
+        } else if (searchMode === "director") {
+          url = `/api/tmdb/director?query=${encodeURIComponent(
             searchQuery
           )}&page=${page}&limit=${limit}`;
         } else {

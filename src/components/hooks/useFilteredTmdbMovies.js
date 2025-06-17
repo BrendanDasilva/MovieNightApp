@@ -1,18 +1,19 @@
 import { useMemo } from "react";
 
+// Hook for filtering and sorting TMDB movie results (movie, actor, director)
 const useFilteredTmdbMovies = (
   movies,
   searchQuery,
   selectedDecade,
   selectedGenreId,
   sortBy,
-  mode // <-- ADD THIS
+  mode
 ) => {
   return useMemo(() => {
     let filtered = [...movies];
 
-    // 🛑 For actor mode, skip title filtering
-    if (searchQuery && mode !== "actor") {
+    // Title filter — skip for actor/director mode
+    if (searchQuery && mode === "movie") {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((movie) =>
         movie.title?.toLowerCase().includes(query)
@@ -29,31 +30,35 @@ const useFilteredTmdbMovies = (
     // Decade filter
     if (selectedDecade !== "All") {
       filtered = filtered.filter((movie) => {
-        const year = parseInt(movie.release_date?.slice(0, 4));
+        const yearStr = movie.release_date?.slice(0, 4);
+        const year = parseInt(yearStr);
         if (isNaN(year)) return false;
+
         return selectedDecade === "Earlier"
           ? year < 1950
           : String(year).startsWith(selectedDecade.slice(0, 3));
       });
     }
 
-    // Sorting
+    // Sorting logic
     switch (sortBy) {
       case "releaseDesc":
         filtered.sort(
-          (a, b) => new Date(b.release_date) - new Date(a.release_date)
+          (a, b) =>
+            new Date(b.release_date || 0) - new Date(a.release_date || 0)
         );
         break;
       case "releaseAsc":
         filtered.sort(
-          (a, b) => new Date(a.release_date) - new Date(b.release_date)
+          (a, b) =>
+            new Date(a.release_date || 0) - new Date(b.release_date || 0)
         );
         break;
       case "ratingDesc":
-        filtered.sort((a, b) => b.vote_average - a.vote_average);
+        filtered.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         break;
       case "ratingAsc":
-        filtered.sort((a, b) => a.vote_average - b.vote_average);
+        filtered.sort((a, b) => (a.vote_average || 0) - (b.vote_average || 0));
         break;
       case "runtimeAsc":
         filtered.sort((a, b) => (a.runtime || 0) - (b.runtime || 0));
@@ -62,7 +67,7 @@ const useFilteredTmdbMovies = (
         filtered.sort((a, b) => (b.runtime || 0) - (a.runtime || 0));
         break;
       case "title":
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
         break;
     }
 

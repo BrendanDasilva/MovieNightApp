@@ -181,12 +181,13 @@ const Browse = ({
                   </button>
 
                   <span className="px-4 py-2 font-semibold">
-                    Page {currentPage}
+                    Page {currentPage} of{" "}
+                    {Math.ceil(totalResults / RESULTS_PER_PAGE)}
                   </span>
 
                   <button
                     onClick={() => setCurrentPage((prev) => prev + 1)}
-                    disabled={filteredResults.length < RESULTS_PER_PAGE}
+                    disabled={currentPage * RESULTS_PER_PAGE >= totalResults}
                     className="px-4 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 disabled:opacity-30"
                   >
                     Next

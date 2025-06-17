@@ -263,6 +263,75 @@ router.get("/actor", async (req, res) => {
   }
 });
 
+// GET /tmdb/director — paginated director movie enrichment
+router.get("/director", async (req, res) => {
+  const { query, page = 1, limit = 20 } = req.query;
+  if (!query) return res.status(400).json({ error: "Query is required" });
+
+  try {
+    // Search for person
+    const searchUrl = `https://api.themoviedb.org/3/search/person?api_key=${tmdbKey}&query=${encodeURIComponent(
+      query
+    )}`;
+    const searchRes = await axios.get(searchUrl);
+
+    // Try to find someone known for directing
+    const directorPerson = searchRes.data.results?.find(
+      (p) =>
+        p.known_for_department === "Directing" ||
+        p.known_for.some((k) => k.media_type === "movie")
+    );
+
+    if (!directorPerson)
+      return res.status(404).json({ error: "Director not found" });
+
+    // Get their movie credits
+    const creditsUrl = `https://api.themoviedb.org/3/person/${directorPerson.id}/movie_credits?api_key=${tmdbKey}`;
+    const creditsRes = await axios.get(creditsUrl);
+
+    // Filter to only movies where they were the director
+    const directedMovies = creditsRes.data.crew.filter(
+      (c) => c.job === "Director" && c.poster_path
+    );
+
+    // Paginate results
+    const paginated = directedMovies.slice((page - 1) * limit, page * limit);
+
+    const enriched = await Promise.all(
+      paginated.map(async (movie) => {
+        try {
+          const movieRes = await axios.get(
+            `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbKey}`
+          );
+          const data = movieRes.data;
+
+          return {
+            id: data.id,
+            title: data.title,
+            poster_path: data.poster_path,
+            release_date: data.release_date,
+            overview: data.overview,
+            vote_average: data.vote_average,
+            runtime: data.runtime,
+            genre: data.genres.map((g) => g.name).join(", "),
+          };
+        } catch (err) {
+          console.warn(`Failed to enrich director movie ID ${movie.id}`);
+          return null;
+        }
+      })
+    );
+
+    res.json({
+      results: enriched.filter(Boolean),
+      total: directedMovies.length,
+    });
+  } catch (err) {
+    console.error("TMDB director search error:", err.message);
+    res.status(500).json({ error: "Failed to search director on TMDB" });
+  }
+});
+
 // GET /tmdb/genres — fetch list of movie genres
 router.get("/genres", async (req, res) => {
   try {
