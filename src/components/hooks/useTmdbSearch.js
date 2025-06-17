@@ -11,12 +11,14 @@ const useTmdbSearch = (
   const [results, setResults] = useState([]); // Fetched results
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
+  const [totalResults, setTotalResults] = useState(0); // Total result count for pagination
 
   useEffect(() => {
     const fetchResults = async () => {
       // Skip fetch if search query is too short
       if (searchQuery.length < 3) {
         setResults([]);
+        setTotalResults(0);
         return;
       }
 
@@ -27,23 +29,25 @@ const useTmdbSearch = (
         let url = "";
 
         if (searchMode === "actor") {
-          // Actor search endpoint with pagination
           url = `/api/tmdb/actor?query=${encodeURIComponent(
             searchQuery
           )}&page=${page}&limit=${limit}`;
         } else {
-          // Movie search endpoint with pagination
           url = `/api/tmdb/search?query=${encodeURIComponent(
             searchQuery
           )}&page=${page}&limit=${limit}`;
         }
 
         const res = await axios.get(url);
-        setResults(res.data || []);
+
+        // Expecting format: { results: [...], total: 60 }
+        setResults(res.data.results || []);
+        setTotalResults(res.data.total || 0);
       } catch (err) {
         console.error("TMDB search failed:", err.message);
         setError("Failed to fetch TMDB results");
         setResults([]);
+        setTotalResults(0);
       } finally {
         setLoading(false);
       }
@@ -53,7 +57,7 @@ const useTmdbSearch = (
     return () => clearTimeout(debounce);
   }, [searchQuery, searchMode, page, limit]);
 
-  return { results, loading, error };
+  return { results, totalResults, loading, error };
 };
 
 export default useTmdbSearch;

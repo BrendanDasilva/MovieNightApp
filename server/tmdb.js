@@ -198,7 +198,10 @@ router.get("/search", async (req, res) => {
       })
     );
 
-    res.json(enriched.filter(Boolean));
+    res.json({
+      results: enriched.filter(Boolean),
+      total: allResults.length,
+    });
   } catch (err) {
     console.error("TMDB search error:", err.message);
     res.status(500).json({ error: "Failed to search TMDB" });
@@ -250,7 +253,10 @@ router.get("/actor", async (req, res) => {
       })
     );
 
-    res.json(enriched.filter(Boolean));
+    res.json({
+      results: enriched.filter(Boolean),
+      total: allMovies.length,
+    });
   } catch (err) {
     console.error("TMDB actor search error:", err.message);
     res.status(500).json({ error: "Failed to search actor on TMDB" });

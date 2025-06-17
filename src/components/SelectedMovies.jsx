@@ -92,7 +92,7 @@ const SelectedMovies = ({
         {isDrawerOpen ? "←" : "→"}
       </button>
 
-      <span className="absolute top-1/2 right-[-4.5rem] transform -translate-y-1/2 rotate-90 text-white text-base font-bold whitespace-nowrap origin-center">
+      <span className="absolute top-1/2 right-[-4rem] transform -translate-y-1/2 rotate-90 text-white text-base font-bold whitespace-nowrap origin-center">
         Movie Night Selections
       </span>
 

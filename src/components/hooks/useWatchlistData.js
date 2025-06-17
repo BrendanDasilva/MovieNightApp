@@ -16,9 +16,11 @@ const useWatchlistData = (setPosterMap, selectedPosters) => {
 
   // Fetch watchlist from backend
   const fetchWatchlist = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get("http://localhost:3001/watchlist/me", {
         headers: { Authorization: `Bearer ${token}` },
       });

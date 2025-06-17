@@ -48,7 +48,7 @@ const Browse = ({
   const genres = useGenres();
 
   // Fetch search results from backend (paginated)
-  const { results, loading } = useTmdbSearch(
+  const { results, totalResults, loading } = useTmdbSearch(
     searchQuery,
     searchMode,
     currentPage,
@@ -138,8 +138,17 @@ const Browse = ({
           {/* Movie results grid + pagination */}
           {!loading && searchQuery.length > 2 && (
             <>
+              {/* Results count display */}
+              {results.length > 0 && (
+                <p className="text-white text-sm mt-6">
+                  Showing {(currentPage - 1) * RESULTS_PER_PAGE + 1}–
+                  {Math.min(currentPage * RESULTS_PER_PAGE, totalResults)} of{" "}
+                  {totalResults} results
+                </p>
+              )}
+
               {/* Results */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
                 {filteredResults.map((movie, idx) => (
                   <MoviePoster
                     key={idx}
