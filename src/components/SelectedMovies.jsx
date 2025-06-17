@@ -86,7 +86,7 @@ const SelectedMovies = ({
 
       <button
         onClick={toggleDrawer}
-        className="self-end mt-4 mr-2 w-8 h-8 flex items-center justify-center bg-[#ff8000] text-white rounded-full focus:outline-none"
+        className="self-end mt-4 mr-2 w-8 h-8 flex items-center justify-center bg-purple-600 hover:bg-purple-800 text-white rounded-full focus:outline-none"
         aria-label={isDrawerOpen ? "Close selections" : "Open selections"}
       >
         {isDrawerOpen ? "←" : "→"}
@@ -139,13 +139,13 @@ const SelectedMovies = ({
       <div className="p-4 flex flex-col items-center gap-3 text-white w-full">
         <button
           onClick={handleRandom}
-          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-[#00e054] hover:bg-green-600 transition-colors duration-200"
+          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-green-600 hover:bg-green-800 transition-colors duration-200"
         >
           Random
         </button>
         <button
           onClick={handleClear}
-          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-[#40bcf4] hover:bg-blue-600 transition-colors duration-200"
+          className="w-3/4 text-sm uppercase font-bold px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-800 transition-colors duration-200"
         >
           Clear
         </button>
@@ -163,7 +163,7 @@ const SelectedMovies = ({
                   handleConfirmSelection(showConfirm);
                   setShowConfirm(null);
                 }}
-                className="px-4 py-2 rounded bg-[#00e054] text-white font-bold"
+                className="px-4 py-2 rounded bg-green-600 hover:bg-green-800 text-white font-bold"
               >
                 Confirm
               </button>
@@ -179,7 +179,7 @@ const SelectedMovies = ({
       )}
 
       {showSuccess && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#00e054] text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-600 text-white font-bold py-3 px-6 rounded shadow-lg animate-fade-in">
           Selection logged successfully!
         </div>
       )}

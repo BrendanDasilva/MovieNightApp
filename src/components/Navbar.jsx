@@ -52,19 +52,19 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
         <div className="hidden md:flex items-center gap-6 font-semibold uppercase">
           <Link
             to="/browse"
-            className="text-sm px-4 py-2 rounded-md bg-[#ff8000] hover:bg-orange-600 transition-colors duration-200"
+            className="text-md px-4 py-2 rounded-md bg-transparent hover:bg-purple-800 transition-colors duration-200"
           >
             Browse
           </Link>
           <Link
             to="/watchlist"
-            className="text-sm px-4 py-2 rounded-md bg-[#00e054] hover:bg-green-600 transition-colors duration-200"
+            className="text-md px-4 py-2 rounded-md bg-transparent hover:bg-purple-800 transition-colors duration-200"
           >
             Watchlist
           </Link>
           <Link
             to="/logs"
-            className="text-sm px-4 py-2 rounded-md bg-[#40bcf4] hover:bg-blue-600 transition-colors duration-200"
+            className="text-md px-4 py-2 rounded-md bg-transparent hover:bg-purple-800 transition-colors duration-200"
           >
             Logs
           </Link>
@@ -74,7 +74,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
         <div className="hidden md:flex items-center gap-4">
           <button
             onClick={handleLogout}
-            className="text-sm px-4 py-2 rounded-md bg-blue-800 hover:bg-blue-600 transition-colors duration-200"
+            className="text-sm px-4 py-2 rounded-md bg-red-600 hover:bg-red-800 transition-colors duration-200"
           >
             Logout
           </button>
@@ -107,28 +107,28 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
           <Link
             to="/"
             onClick={() => setMenuOpen(false)}
-            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+            className="w-full text-center py-3 text-white hover:text-purple-400 no-underline transition-colors"
           >
             Home
           </Link>
           <Link
             to="/browse"
             onClick={() => setMenuOpen(false)}
-            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+            className="w-full text-center py-3 text-white hover:text-purple-400 no-underline transition-colors"
           >
             Browse
           </Link>
           <Link
             to="/watchlist"
             onClick={() => setMenuOpen(false)}
-            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+            className="w-full text-center py-3 text-white hover:text-purple-400 no-underline transition-colors"
           >
             Watchlist
           </Link>
           <Link
             to="/logs"
             onClick={() => setMenuOpen(false)}
-            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline transition-colors"
+            className="w-full text-center py-3 text-white hover:text-purple-400 no-underline transition-colors"
           >
             Logs
           </Link>
@@ -137,7 +137,7 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
               handleLogout();
               setMenuOpen(false);
             }}
-            className="w-full text-center py-3 text-white hover:text-[#ff8000] no-underline uppercase transition-colors"
+            className="w-full text-center py-3 text-white hover:text-red-600 no-underline uppercase transition-colors"
           >
             Logout
           </button>
