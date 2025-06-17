@@ -120,17 +120,15 @@ const Browse = ({
             </div>
 
             {/* Filters */}
-            {searchQuery.length > 2 && (
-              <BrowseFilters
-                genres={genres}
-                selectedGenreId={selectedGenreId}
-                setSelectedGenreId={setSelectedGenreId}
-                selectedDecade={selectedDecade}
-                setSelectedDecade={setSelectedDecade}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-              />
-            )}
+            <BrowseFilters
+              genres={genres}
+              selectedGenreId={selectedGenreId}
+              setSelectedGenreId={setSelectedGenreId}
+              selectedDecade={selectedDecade}
+              setSelectedDecade={setSelectedDecade}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+            />
 
             {loading && <LoadingDots />}
           </div>

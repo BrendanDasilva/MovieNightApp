@@ -231,6 +231,25 @@ const MovieModal = ({
                 {details.release_date &&
                   ` (${details.release_date.split("-")[0]})`}
               </h2>
+
+              {details.director && (
+                <p className="text-gray-400 mb-3">
+                  Directed by{" "}
+                  <button
+                    className="underline hover:text-purple-400 transition"
+                    onClick={() => {
+                      navigate(
+                        `/browse?query=${encodeURIComponent(
+                          details.director
+                        )}&mode=director`
+                      );
+                      onClose();
+                    }}
+                  >
+                    {details.director}
+                  </button>
+                </p>
+              )}
               {details.tagline && (
                 <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
               )}
@@ -340,9 +359,6 @@ const MovieModal = ({
 
               {activeTab === "details" && (
                 <div className="text-sm space-y-2">
-                  <p>
-                    <strong>Director:</strong> {details.director}
-                  </p>
                   <p>
                     <strong>Language:</strong> {details.language}
                   </p>
