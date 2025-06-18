@@ -1,6 +1,7 @@
 import { useMemo } from "react";
+import Fuse from "fuse.js";
 
-// Hook for filtering and sorting TMDB movie results (movie, actor, director)
+// Hook for fuzzy searching and sorting TMDB movie results
 const useFilteredTmdbMovies = (
   movies,
   searchQuery,
@@ -12,12 +13,15 @@ const useFilteredTmdbMovies = (
   return useMemo(() => {
     let filtered = [...movies];
 
-    // Title filter — skip for actor/director mode
+    // Apply fuzzy search only for movie mode
     if (searchQuery && mode === "movie") {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((movie) =>
-        movie.title?.toLowerCase().includes(query)
-      );
+      const fuse = new Fuse(movies, {
+        keys: ["title"],
+        threshold: 0.4, // lower = stricter match
+        ignoreLocation: true,
+      });
+      const results = fuse.search(searchQuery);
+      filtered = results.map((r) => r.item); // Extract movie objects
     }
 
     // Genre filter
@@ -30,17 +34,15 @@ const useFilteredTmdbMovies = (
     // Decade filter
     if (selectedDecade !== "All") {
       filtered = filtered.filter((movie) => {
-        const yearStr = movie.release_date?.slice(0, 4);
-        const year = parseInt(yearStr);
+        const year = parseInt(movie.release_date?.slice(0, 4));
         if (isNaN(year)) return false;
-
         return selectedDecade === "Earlier"
           ? year < 1950
           : String(year).startsWith(selectedDecade.slice(0, 3));
       });
     }
 
-    // Sorting logic
+    // Sorting logic (after fuzzy match)
     switch (sortBy) {
       case "releaseDesc":
         filtered.sort(
