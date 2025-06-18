@@ -57,6 +57,12 @@ const Navbar = ({ onLogout, isDrawerOpen }) => {
             Browse
           </Link>
           <Link
+            to="/search"
+            className="text-md px-4 py-2 rounded-md bg-transparent hover:bg-purple-800 transition-colors duration-200"
+          >
+            Search
+          </Link>
+          <Link
             to="/watchlist"
             className="text-md px-4 py-2 rounded-md bg-transparent hover:bg-purple-800 transition-colors duration-200"
           >

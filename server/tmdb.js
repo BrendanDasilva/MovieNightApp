@@ -161,17 +161,133 @@ router.get("/genre/:genreId", async (req, res) => {
 
 // GET /tmdb/search — paginated search with controlled enrichment
 router.get("/search", async (req, res) => {
-  const { query, page = 1, limit = 20 } = req.query;
+  const {
+    query,
+    page = 1,
+    limit = 20,
+    genre = null,
+    decade = null,
+  } = req.query;
+
   if (!query) return res.status(400).json({ error: "Query is required" });
 
   try {
-    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(
+    let allResults = [];
+
+    // Handle preset cases (Popular / Top Rated — top 100)
+    if (query === "__tmdb_popular__" || query === "__tmdb_top_rated__") {
+      const baseUrl =
+        query === "__tmdb_popular__"
+          ? `https://api.themoviedb.org/3/movie/popular?api_key=${tmdbKey}`
+          : `https://api.themoviedb.org/3/movie/top_rated?api_key=${tmdbKey}`;
+
+      for (let i = 1; i <= 5; i++) {
+        const res = await axios.get(`${baseUrl}&page=${i}`);
+        const pageResults = res.data.results.filter((m) => m.poster_path);
+        allResults.push(...pageResults);
+      }
+
+      const start = (page - 1) * limit;
+      const paginated = allResults.slice(start, start + limit);
+
+      const enriched = await Promise.all(
+        paginated.map(async (movie) => {
+          try {
+            const movieRes = await axios.get(
+              `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbKey}`
+            );
+            const data = movieRes.data;
+
+            return {
+              id: data.id,
+              title: data.title,
+              poster_path: data.poster_path,
+              release_date: data.release_date,
+              overview: data.overview,
+              vote_average: data.vote_average,
+              runtime: data.runtime,
+              genre: data.genres.map((g) => g.name).join(", "),
+            };
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      return res.json({
+        results: enriched.filter(Boolean),
+        total: 100,
+      });
+    }
+
+    // Discover mode for genre/decade
+    const discoverParams = new URLSearchParams({
+      api_key: tmdbKey,
+      page,
+      sort_by: "popularity.desc",
+    });
+
+    if (genre) discoverParams.append("with_genres", genre);
+
+    if (decade) {
+      if (decade === "Earlier") {
+        discoverParams.append("release_date.lte", "1949-12-31");
+      } else {
+        const startYear = decade.slice(0, 4);
+        discoverParams.append("release_date.gte", `${startYear}-01-01`);
+        discoverParams.append(
+          "release_date.lte",
+          `${parseInt(startYear) + 9}-12-31`
+        );
+      }
+    }
+
+    if (genre || decade) {
+      const discoverRes = await axios.get(
+        `https://api.themoviedb.org/3/discover/movie?${discoverParams.toString()}`
+      );
+
+      let results = discoverRes.data.results.filter((m) => m.poster_path);
+
+      const enriched = await Promise.all(
+        results.map(async (movie) => {
+          try {
+            const movieRes = await axios.get(
+              `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbKey}`
+            );
+            const data = movieRes.data;
+
+            return {
+              id: data.id,
+              title: data.title,
+              poster_path: data.poster_path,
+              release_date: data.release_date,
+              overview: data.overview,
+              vote_average: data.vote_average,
+              runtime: data.runtime,
+              genre: data.genres.map((g) => g.name).join(", "),
+            };
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      return res.json({
+        results: enriched.filter(Boolean),
+        total: discoverRes.data.total_results,
+      });
+    }
+
+    // Default search
+    const tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(
       query
     )}&page=${page}`;
-    const searchRes = await axios.get(searchUrl);
-    const allResults = searchRes.data.results.filter((m) => m.poster_path);
 
-    const paginated = allResults.slice(0, limit);
+    const searchRes = await axios.get(tmdbUrl);
+    let results = searchRes.data.results.filter((m) => m.poster_path);
+
+    const paginated = results.slice((page - 1) * limit, page * limit);
 
     const enriched = await Promise.all(
       paginated.map(async (movie) => {
@@ -191,8 +307,7 @@ router.get("/search", async (req, res) => {
             runtime: data.runtime,
             genre: data.genres.map((g) => g.name).join(", "),
           };
-        } catch (err) {
-          console.warn(`Failed to enrich movie ID ${movie.id}`);
+        } catch {
           return null;
         }
       })
@@ -200,11 +315,11 @@ router.get("/search", async (req, res) => {
 
     res.json({
       results: enriched.filter(Boolean),
-      total: allResults.length,
+      total: results.length,
     });
   } catch (err) {
-    console.error("TMDB search error:", err.message);
-    res.status(500).json({ error: "Failed to search TMDB" });
+    console.error("TMDB /search error:", err.message);
+    res.status(500).json({ error: "Failed to fetch TMDB search results" });
   }
 });
 

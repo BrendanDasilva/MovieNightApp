@@ -13,6 +13,7 @@ import NavBar from "./components/NavBar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Home from "./pages/Home";
+import Search from "./pages/Search";
 import Browse from "./pages/Browse";
 import Watchlist from "./pages/Watchlist";
 import Logs from "./pages/Logs";
@@ -279,6 +280,23 @@ const App = () => {
                     path="/browse"
                     element={
                       <Browse
+                        selectedPosters={selectedPosters}
+                        posterMap={posterMap}
+                        handleAddPoster={handleAddPoster}
+                        handleRemovePoster={handleRemovePoster}
+                        setSelectedMovie={setSelectedMovie}
+                        selectedMovie={selectedMovie}
+                        watchlistTitles={watchlistTitles}
+                        handleAddToWatchlist={handleAddToWatchlist}
+                        handleRemoveFromWatchlist={handleRemoveFromWatchlist}
+                        isDrawerOpen={isDrawerOpen}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/search"
+                    element={
+                      <Search
                         selectedPosters={selectedPosters}
                         posterMap={posterMap}
                         handleAddPoster={handleAddPoster}

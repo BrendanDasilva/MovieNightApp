@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+// Custom hook to fetch TMDB genres as objects with id and name
 const useGenres = () => {
   const [genres, setGenres] = useState([]);
 
@@ -8,11 +9,12 @@ const useGenres = () => {
       try {
         const res = await fetch("/api/tmdb/genres");
         const data = await res.json();
-        setGenres(data.map((g) => g.name));
+        setGenres(data); // returns [{ id, name }, ...]
       } catch (err) {
         console.error("Failed to fetch genres", err);
       }
     };
+
     fetchGenres();
   }, []);
 
