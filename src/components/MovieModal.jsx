@@ -122,7 +122,7 @@ const MovieModal = ({
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center"
       onClick={handleBackgroundClick}
     >
-      <div className="bg-[#14181c] text-white w-full max-w-4xl max-h-[90vh] p-6 rounded-lg shadow-xl relative overflow-y-auto animate-fade-in">
+      <div className="bg-[#14181c] text-white w-full max-w-5xl max-h-[90vh] p-6 rounded-lg shadow-xl relative overflow-y-auto animate-fade-in">
         {/* Close modal button */}
         <button
           className="absolute top-3 right-4 text-gray-400 hover:text-white text-2xl"
@@ -250,9 +250,6 @@ const MovieModal = ({
                   </button>
                 </p>
               )}
-              {details.tagline && (
-                <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
-              )}
 
               {/* Genre tags and rating badge */}
               <div className="flex justify-between items-center mb-4">
@@ -287,17 +284,22 @@ const MovieModal = ({
                 )}
               </div>
 
-              {/* Runtime display */}
-              {details.runtime && (
-                <p className="text-sm text-gray-200 mb-2">
-                  <strong>Runtime:</strong> {details.runtime}
-                </p>
+              {/* Tagline display */}
+              {details.tagline && (
+                <p className="italic text-gray-400 mb-3">"{details.tagline}"</p>
               )}
 
               {/* Plot summary */}
               {details.plot && (
                 <p className="text-sm text-gray-200 mb-4">
                   <strong>Plot:</strong> {details.plot}
+                </p>
+              )}
+
+              {/* Runtime display */}
+              {details.runtime && (
+                <p className="text-sm text-gray-200 mb-8">
+                  <strong>Runtime:</strong> {details.runtime}
                 </p>
               )}
 

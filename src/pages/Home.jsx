@@ -7,6 +7,7 @@ import PageWrapper from "../components/PageWrapper";
 import useLatestHomeData from "../components/hooks/useLatestHomeData";
 import useGenreMovies from "../components/hooks/useGenreMovies";
 import Toast from "../components/Toast";
+import { FiCheckCircle } from "react-icons/fi";
 
 // Home page: shows last selection log, trending films, spotlight genre, and news
 const Home = ({
@@ -26,6 +27,9 @@ const Home = ({
     id: 28,
     name: "Action",
   });
+
+  // State to toggle About accordion
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // Fetch home data from custom hook
   const { latestLog, trendingMovies, genres, news, loading, errors } =
@@ -76,28 +80,50 @@ const Home = ({
           <h1 className="text-5xl font-bold mb-10 text-center text-white">
             Welcome to the Movie Night App!
           </h1>
-          <p className=" text-white text-lg m-10">
-            Here's how this works - if you just want to look through a bunch of
-            movies and pick one to watch, go for it! But what this app provides
-            you is something a little different when you're trying to picking a
-            movie with your partner or with friends. What I've done, is turn
-            picking a movie into something much more interactive and fun!
-          </p>
-          <p className=" text-white text-lg m-10">
-            This is what you do - pick 3 movies, from the database or from your
-            watchlist, and then you can vote on which one you want to watch. The
-            app will keep track of your selections, so you can see what you've
-            watched in the past and what you might want to watch in the future.
-            You can also add movies to your watchlist, so you never forget what
-            you want to see next!
-          </p>
-          <p className="text-white text-lg m-10">
-            My wife and I have been using this method to pick movies for over 5
-            years now and have had over 175 movie nights together this way! We
-            make it fun through presentation of the picks, seeing if the other
-            can guess the movie based on different clues and details! Give it a
-            try!
-          </p>
+
+          {/* Accordion Toggle */}
+          <div className="flex justify-start mb-2">
+            <button
+              onClick={() => setAboutOpen(!aboutOpen)}
+              className="text-white text-lg font-semibold focus:outline-none"
+            >
+              About the App
+              <span className="ml-2">{aboutOpen ? "▲" : "▼"}</span>
+            </button>
+          </div>
+
+          {/* Accordion Content */}
+          <div
+            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+              aboutOpen ? "max-h-[1000px] mt-4" : "max-h-0"
+            }`}
+          >
+            <div className="space-y-4 text-white text-lg text-left">
+              <p>
+                Here's how this works - if you just want to look through a bunch
+                of movies and pick one to watch, go for it! But what this app
+                provides you is something a little different when you're trying
+                to pick a movie with your partner or with friends. What I've
+                done, is turn picking a movie into something much more
+                interactive and fun!
+              </p>
+              <p>
+                This is what you do - pick 3 movies, from the database or from
+                your watchlist, and then you can vote on which one you want to
+                watch. The app will keep track of your selections, so you can
+                see what you've watched in the past and what you might want to
+                watch in the future. You can also add movies to your watchlist,
+                so you never forget what you want to see next!
+              </p>
+              <p>
+                My wife and I have been using this method to pick movies for
+                over 5 years now and have had over 175 movie nights together
+                this way! We make it fun through presentation of the picks,
+                seeing if the other can guess the movie based on different clues
+                and details! Give it a try!
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* ---- Last Movie Night Selection ---- */}
@@ -115,7 +141,7 @@ const Home = ({
                 <div
                   key={i}
                   className={`w-full aspect-[2/3] rounded-lg shadow-inner overflow-hidden relative ${
-                    !movie.isSelected ? "grayscale" : ""
+                    !movie.isSelected ? "grayscale" : "border-2 border-white"
                   }`}
                 >
                   {/* Poster image or fallback box */}
@@ -130,13 +156,13 @@ const Home = ({
                       {movie.title || `Poster ${i + 1}`}
                     </div>
                   )}
-                  {/* Movie label with checkmark */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
-                    {movie.title}
-                    {movie.isSelected && (
-                      <span className="ml-2 text-green-400">✓</span>
-                    )}
-                  </div>
+
+                  {/* Green checkmark icon for selected movie */}
+                  {movie.isSelected && (
+                    <div className="absolute top-1.5 right-2 text-green-400">
+                      <FiCheckCircle size={26} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
