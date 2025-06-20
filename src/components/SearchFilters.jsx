@@ -15,6 +15,7 @@ const decades = [
 ];
 
 const sortOptions = [
+  { value: "", label: "None" },
   { value: "releaseDesc", label: "Release Date (Newest)" },
   { value: "releaseAsc", label: "Release Date (Oldest)" },
   { value: "ratingDesc", label: "Rating (High to Low)" },

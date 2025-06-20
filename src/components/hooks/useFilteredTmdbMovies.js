@@ -59,34 +59,40 @@ const useFilteredTmdbMovies = (
     }
 
     // Sorting logic (after fuzzy match)
-    switch (sortBy) {
-      case "releaseDesc":
-        filtered.sort(
-          (a, b) =>
-            new Date(b.release_date || 0) - new Date(a.release_date || 0)
-        );
-        break;
-      case "releaseAsc":
-        filtered.sort(
-          (a, b) =>
-            new Date(a.release_date || 0) - new Date(b.release_date || 0)
-        );
-        break;
-      case "ratingDesc":
-        filtered.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-        break;
-      case "ratingAsc":
-        filtered.sort((a, b) => (a.vote_average || 0) - (b.vote_average || 0));
-        break;
-      case "runtimeAsc":
-        filtered.sort((a, b) => (a.runtime || 0) - (b.runtime || 0));
-        break;
-      case "runtimeDesc":
-        filtered.sort((a, b) => (b.runtime || 0) - (a.runtime || 0));
-        break;
-      case "title":
-        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-        break;
+    if (sortBy) {
+      switch (sortBy) {
+        case "releaseDesc":
+          filtered.sort(
+            (a, b) =>
+              new Date(b.release_date || 0) - new Date(a.release_date || 0)
+          );
+          break;
+        case "releaseAsc":
+          filtered.sort(
+            (a, b) =>
+              new Date(a.release_date || 0) - new Date(b.release_date || 0)
+          );
+          break;
+        case "ratingDesc":
+          filtered.sort(
+            (a, b) => (b.vote_average || 0) - (a.vote_average || 0)
+          );
+          break;
+        case "ratingAsc":
+          filtered.sort(
+            (a, b) => (a.vote_average || 0) - (b.vote_average || 0)
+          );
+          break;
+        case "runtimeAsc":
+          filtered.sort((a, b) => (a.runtime || 0) - (b.runtime || 0));
+          break;
+        case "runtimeDesc":
+          filtered.sort((a, b) => (b.runtime || 0) - (a.runtime || 0));
+          break;
+        case "title":
+          filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+          break;
+      }
     }
 
     return filtered;

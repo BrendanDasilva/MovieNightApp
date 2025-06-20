@@ -31,7 +31,7 @@ const Search = ({
 
   const [selectedDecade, setSelectedDecade] = useState("All");
   const [selectedGenreId, setSelectedGenreId] = useState("All");
-  const [sortBy, setSortBy] = useState("popularityDesc");
+  const [sortBy, setSortBy] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const RESULTS_PER_PAGE = 20;
@@ -138,11 +138,14 @@ const Search = ({
           {!loading && searchQuery.length > 2 && (
             <>
               {/* Results count display */}
-              {results.length > 0 && (
+              {filteredResults.length > 0 && (
                 <p className="text-white text-sm mt-6">
                   Showing {(currentPage - 1) * RESULTS_PER_PAGE + 1}–
-                  {Math.min(currentPage * RESULTS_PER_PAGE, totalResults)} of{" "}
-                  {totalResults} results
+                  {Math.min(
+                    currentPage * RESULTS_PER_PAGE,
+                    filteredResults.length
+                  )}{" "}
+                  of {filteredResults.length} results
                 </p>
               )}
 
