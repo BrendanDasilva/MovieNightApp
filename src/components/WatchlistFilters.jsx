@@ -64,8 +64,8 @@ const WatchlistFilters = ({
         >
           <option value="All">All</option>
           {(genres || []).map((g) => (
-            <option key={g} value={g}>
-              {g}
+            <option key={g.id} value={g.name}>
+              {g.name}
             </option>
           ))}
         </select>

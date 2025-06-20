@@ -19,7 +19,10 @@ const useFilteredMovies = (
         .includes(searchQuery.toLowerCase());
 
       const genreMatch =
-        selectedGenre === "All" || (movie.genre || "").includes(selectedGenre);
+        selectedGenre === "All" ||
+        (Array.isArray(movie.genre)
+          ? movie.genre.includes(selectedGenre)
+          : (movie.genre || "").includes(selectedGenre));
 
       const year = parseInt(movie.release_date?.slice(0, 4), 10);
       let decadeMatch = true;

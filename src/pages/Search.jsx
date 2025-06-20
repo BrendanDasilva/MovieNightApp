@@ -7,7 +7,7 @@ import MoviePoster from "../components/MoviePoster";
 import PageWrapper from "../components/PageWrapper";
 import useTmdbSearch from "../components/hooks/useTmdbSearch";
 import Toast from "../components/Toast";
-import BrowseFilters from "../components/BrowseFilters";
+import SearchFilters from "../components/SearchFilters";
 import useFilteredTmdbMovies from "../components/hooks/useFilteredTmdbMovies";
 import useGenres from "../components/hooks/useGenres";
 
@@ -67,7 +67,8 @@ const Search = ({
     selectedDecade,
     selectedGenreId,
     sortBy,
-    searchMode
+    searchMode,
+    genres
   );
 
   const [watchlistAlert, setWatchlistAlert] = useState(false);
@@ -120,8 +121,8 @@ const Search = ({
             </div>
 
             {/* Filters */}
-            <BrowseFilters
-              genres={genres.name}
+            <SearchFilters
+              genres={genres}
               selectedGenreId={selectedGenreId}
               setSelectedGenreId={setSelectedGenreId}
               selectedDecade={selectedDecade}

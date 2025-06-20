@@ -239,7 +239,7 @@ const MovieModal = ({
                     className="underline hover:text-purple-400 transition"
                     onClick={() => {
                       navigate(
-                        `/browse?query=${encodeURIComponent(
+                        `/search?query=${encodeURIComponent(
                           details.director
                         )}&mode=director`
                       );
@@ -264,7 +264,7 @@ const MovieModal = ({
                   ))}
                 </div>
 
-                {details.rating && (
+                {details.rating && Number(details.rating) > 0 ? (
                   <div
                     className={`flex items-center gap-1 text-sm font-bold px-3 py-1 rounded shadow ${
                       Number(details.rating) < 2
@@ -280,6 +280,10 @@ const MovieModal = ({
                   >
                     {Number(details.rating).toFixed(1)}{" "}
                     <span className="text-white">★</span>
+                  </div>
+                ) : (
+                  <div className="bg-gray-700 text-white text-sm font-semibold px-3 py-1 rounded">
+                    N/A
                   </div>
                 )}
               </div>
@@ -345,7 +349,7 @@ const MovieModal = ({
                       key={actor}
                       onClick={() => {
                         navigate(
-                          `/browse?query=${encodeURIComponent(
+                          `/search?query=${encodeURIComponent(
                             actor
                           )}&mode=actor`
                         );

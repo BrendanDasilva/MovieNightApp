@@ -131,7 +131,7 @@ const Watchlist = ({
             setSelectedDecade={setSelectedDecade}
             sortBy={sortBy}
             setSortBy={setSortBy}
-            genres={genres.name}
+            genres={genres}
           />
 
           {/* Filtered results count */}

@@ -61,9 +61,9 @@ const BrowseFilters = ({
           className="bg-[#14181c] text-white px-3 py-2 rounded border border-gray-600"
         >
           <option value="All">All</option>
-          {(genres || []).map((genreName) => (
-            <option key={genreName} value={genreName}>
-              {genreName}
+          {(genres || []).map((genre) => (
+            <option key={genre.id} value={genre.id}>
+              {genre.name}
             </option>
           ))}
         </select>

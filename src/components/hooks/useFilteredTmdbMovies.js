@@ -8,7 +8,8 @@ const useFilteredTmdbMovies = (
   selectedDecade,
   selectedGenreId,
   sortBy,
-  mode
+  mode,
+  genres = []
 ) => {
   return useMemo(() => {
     let filtered = [...movies];
@@ -26,9 +27,24 @@ const useFilteredTmdbMovies = (
 
     // Genre filter
     if (selectedGenreId !== "All") {
-      filtered = filtered.filter((movie) =>
-        movie.genre?.split(", ").includes(selectedGenreId)
-      );
+      const selectedId = Number(selectedGenreId);
+
+      filtered = filtered.filter((movie) => {
+        // Case 1: Raw TMDB response (genre_ids)
+        if (Array.isArray(movie.genre_ids)) {
+          return movie.genre_ids.includes(selectedId);
+        }
+
+        // Case 2: Enriched backend response with genre as string
+        if (typeof movie.genre === "string") {
+          return movie.genre.split(", ").includes(
+            // Find genre name from id
+            genres.find((g) => g.id === selectedId)?.name
+          );
+        }
+
+        return false;
+      });
     }
 
     // Decade filter
@@ -74,7 +90,15 @@ const useFilteredTmdbMovies = (
     }
 
     return filtered;
-  }, [movies, searchQuery, selectedGenreId, selectedDecade, sortBy, mode]);
+  }, [
+    movies,
+    searchQuery,
+    selectedGenreId,
+    selectedDecade,
+    sortBy,
+    mode,
+    genres,
+  ]);
 };
 
 export default useFilteredTmdbMovies;

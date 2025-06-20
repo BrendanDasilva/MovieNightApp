@@ -82,7 +82,7 @@ const Home = ({
           </h1>
 
           {/* Accordion Toggle */}
-          <div className="flex justify-start mb-2">
+          <div className="flex justify-center mb-2">
             <button
               onClick={() => setAboutOpen(!aboutOpen)}
               className="text-white text-lg font-semibold focus:outline-none"
